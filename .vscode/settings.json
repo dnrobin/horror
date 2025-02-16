@@ -1,0 +1,31 @@
+{
+    "files.associations": {
+        "image.h": "c",
+        "sound.h": "c",
+        "game.h": "c",
+        "graphics.h": "c",
+        "shaders.h": "c",
+        "mem.h": "c",
+        "shared.h": "c",
+        "timing.h": "c",
+        "time.h": "c",
+        "common.h": "c",
+        "res.h": "c",
+        "stdlib.h": "c",
+        "ios": "c",
+        "physics.h": "c",
+        "map.h": "c",
+        "glad.h": "c",
+        "string": "c",
+        "vector": "c",
+        "trigger.h": "c",
+        "render.h": "c",
+        "__node_handle": "c",
+        "locale": "c",
+        "input.h": "c",
+        "controls.h": "c",
+        "glfw3.h": "c",
+        "linmath.h": "c",
+        "math.h": "c"
+    }
+}
