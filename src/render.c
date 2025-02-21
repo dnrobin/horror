@@ -28,7 +28,7 @@ void display() {
 	float twirl1 = sin(1*PI*t);
 	float twirl2 = sin(2*PI*t);
 	float twirl3 = sin(3*PI*t);
-	float flare = 0.1 * ( 7.0 + 2*sin(PI*t) + sin(3*PI*twirl1) + sin(4*PI*t) + 2*sin(7*PI*twirl3/3)*sin(3*PI*t) );
+	float flare = 0.1 * ( 7.0 + sin(.1*PI*t) + sin(3*PI*twirl1) + sin(.4*PI*t) + 2*sin(.7*PI*twirl3/3)*sin(.3*PI*t) );
 	
 	glClearAccum(1.0, 1.0, 1.0, 1.0);
 	
@@ -67,7 +67,7 @@ void display() {
 	}
 
 	// create light source to follow player around
-	t_vec3 light_offset = (t_vec3){-0.16, -0.02, -0.35};
+	vec3_t light_offset = (vec3_t){-0.16, -0.02, -0.35};
 	v_rot(&light_offset, -0.5*g_game_camera.rotation.x, -g_game_camera.rotation.y, 0);
 		if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
 			v_rot(&light_offset,

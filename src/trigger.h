@@ -6,7 +6,7 @@
 
 typedef struct trigger {
 	void (*action)();
-	t_vec3 position;
+	vec3_t position;
 	char retrigger;
 	float retrigger_interval;
 	float retrigger_start_time;
@@ -16,7 +16,7 @@ typedef struct trigger {
 
 h_array g_triggers;
 
-void addTrigger(const t_vec3 position, const void(*action)(), const char retrigger, const float retrigger_interval);
+void addTrigger(const vec3_t position, const void(*action)(), const char retrigger, const float retrigger_interval);
 void fireTrigger(h_trigger trig);
 
 #endif

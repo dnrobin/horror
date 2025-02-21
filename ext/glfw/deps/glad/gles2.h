@@ -240,9 +240,9 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_FLOAT_MAT2 0x8B5A
 #define GL_FLOAT_MAT3 0x8B5B
 #define GL_FLOAT_MAT4 0x8B5C
-#define GL_FLOAT_VEC2 0x8B50
-#define GL_FLOAT_VEC3 0x8B51
-#define GL_FLOAT_VEC4 0x8B52
+#define GL_FLOAvec2_t 0x8B50
+#define GL_FLOAvec3_t 0x8B51
+#define GL_FLOAvec4_t 0x8B52
 #define GL_FRAGMENT_SHADER 0x8B30
 #define GL_FRAMEBUFFER 0x8D40
 #define GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME 0x8CD1
@@ -273,9 +273,9 @@ typedef void (*GLADpostcallback)(void *ret, const char *name, GLADapiproc apipro
 #define GL_INCR_WRAP 0x8507
 #define GL_INFO_LOG_LENGTH 0x8B84
 #define GL_INT 0x1404
-#define GL_INT_VEC2 0x8B53
-#define GL_INT_VEC3 0x8B54
-#define GL_INT_VEC4 0x8B55
+#define GL_INvec2_t 0x8B53
+#define GL_INvec3_t 0x8B54
+#define GL_INvec4_t 0x8B55
 #define GL_INVALID_ENUM 0x0500
 #define GL_INVALID_FRAMEBUFFER_OPERATION 0x0506
 #define GL_INVALID_OPERATION 0x0502

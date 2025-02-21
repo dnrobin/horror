@@ -23,18 +23,18 @@ h_entity new_entity() {
 	return entity;
 }
 
-void position_entity(h_entity ent, t_vec3 p) {
+void position_entity(h_entity ent, vec3_t p) {
 	ent->position = p;
 }
 
-void move_entity(h_entity ent, t_vec3 d) {
+void move_entity(h_entity ent, vec3_t d) {
 	ent->position = vadd(ent->position, d);
 }
 
-void rotate_entity(h_entity ent, t_vec3 r) {
+void rotate_entity(h_entity ent, vec3_t r) {
 	v_rot(&ent->direction, r.x, r.y, r.z);
 	v_rot(&ent->up, r.x, r.y, r.z);
 }
 
-void point_entity(h_entity ent, t_vec3 p) {
+void point_entity(h_entity ent, vec3_t p) {
 }

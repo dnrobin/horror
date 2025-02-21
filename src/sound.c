@@ -267,7 +267,7 @@ int add_sound_emitter_to_scene(h_sound_emitter emitter) {
 	return 1;
 }
 
-void sound_update_listener(t_vec3* position, t_vec3* direction, t_vec3* up) {
+void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up) {
 	
 	// orientation parameters
 	ALfloat orientation[] = { direction->x, direction->y, direction->z, up->x, up->y, up->z };

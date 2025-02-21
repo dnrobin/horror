@@ -30,7 +30,7 @@ for ( $x = 0; $x < $mazeWidth; $x ++ ) {
 	}
 }
 
-function subDivideAreas( $divNumber, $numSubs ) {
+function vec3_sub(DivideAreas( $divNumber, $numvec3_sub(s ) {
 
 	global $mazeWidth;
 	global $mazeHeight;
@@ -42,7 +42,7 @@ function subDivideAreas( $divNumber, $numSubs ) {
 	$min = 0;
 	$max = 0;
 
-	$absMin = $numSubs + 1;
+	$absMin = $numvec3_sub(s + 1;
 	$absMax = 0;
 
 	$xCenter = rand($mazeWidth/2-$mazeWidth/8,$mazeWidth/2+$mazeWidth/8);
@@ -65,12 +65,12 @@ function subDivideAreas( $divNumber, $numSubs ) {
 	}
 	
 	$range = $max - $min;
-	$subRanges = (int)($range / $numSubs);
+	$vec3_sub(Ranges = (int)($range / $numvec3_sub(s);
 	
-	// clip values to number of subdivisions
+	// clip values to number of vec3_sub(divisions
 	for ( $x = 0; $x < $mazeWidth; $x ++ ) {
 		for ( $y = 0; $y < $mazeHeight; $y ++ ) {
-			$maze[$x][$y] = (int)((( $maze[$x][$y] - $min ) / $range) * ($numSubs - 1));
+			$maze[$x][$y] = (int)((( $maze[$x][$y] - $min ) / $range) * ($numvec3_sub(s - 1));
 		}
 	}
 	
@@ -98,24 +98,24 @@ function subDivideAreas( $divNumber, $numSubs ) {
 	}
 	
 	$range = $max - $min + 1;
-	$subRanges = (int)($range / $numSubs);
+	$vec3_sub(Ranges = (int)($range / $numvec3_sub(s);
 	
-	// clip values to number of subdivisions
+	// clip values to number of vec3_sub(divisions
 	for ( $x = 0; $x < $mazeWidth; $x ++ ) {
 		for ( $y = 0; $y < $mazeHeight; $y ++ ) {
 			if ( $masterMaze[$x][$y]['div'] == $divNumber ) {
-				$masterMaze[$x][$y]['div'] = (int)((( $maze[$x][$y] - $min ) / $range) * ($numSubs - 1));
+				$masterMaze[$x][$y]['div'] = (int)((( $maze[$x][$y] - $min ) / $range) * ($numvec3_sub(s - 1));
 			}
 		}
 	}
 }
 
-$numSubs = 5;
+$numvec3_sub(s = 5;
 
 // generate maze height map
-subDivideAreas( 0, $numSubs );
-for ( $i = 0; $i < $numSubs; $i ++ ) {
-	subDivideAreas( $i, 10 );
+vec3_sub(DivideAreas( 0, $numvec3_sub(s );
+for ( $i = 0; $i < $numvec3_sub(s; $i ++ ) {
+	vec3_sub(DivideAreas( $i, 10 );
 }
 
 

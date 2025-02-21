@@ -3,6 +3,8 @@
 
 #include <OpenAL/al.h>
 
+#include "math.h"
+
 #define MAX_SOUND_BUFFERS 32	// MAX POSSIBLE, ACTUAL NUMBER DEFINED AT RUNTIME
 #define MAX_SOUND_SOURCES 32	// SAME
 
@@ -48,9 +50,9 @@ typedef struct sound_resource_descriptor {
 
 typedef struct sound_emitter {
 	unsigned char options;		// option bits
-	t_vec3 position;			// position in world
-	t_vec3 velocity;			// velocity if moving to calculate dopler shift
-	t_vec3 direction;			// direction the sound is being emitted
+	vec3_t position;			// position in world
+	vec3_t velocity;			// velocity if moving to calculate dopler shift
+	vec3_t direction;			// direction the sound is being emitted
 	float gain;					// nominal gain value
 	float pitch;				// pitch shift amount (1 octave for every 50% of nominal value 1.0)
 	float gain_rolloff;			// gain rolloff factor per unit of distance to the source is source is not global
@@ -70,7 +72,7 @@ int shutdownAL();
 h_audio_buffer_descriptor loadSoundFromFile(const char* filename);
 h_sound_emitter get_new_sound_emitter(const int sound_buffer_id);
 int add_sound_emitter_to_scene(h_sound_emitter emitter);
-void sound_update_listener(t_vec3* position, t_vec3* direction, t_vec3* up);
+void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up);
 void load_sound_emitters(const int soundc, t_sound_resource_descriptor* soundv);
 void soundSetState(const int source_id, const int state_id);
 void playSound(const int source_id);

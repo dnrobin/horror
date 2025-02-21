@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-void addTrigger(const t_vec3 position, const void(*action)(), const char retrigger, const float retrigger_interval) {
+void addTrigger(const vec3_t position, const void(*action)(), const char retrigger, const float retrigger_interval) {
 	h_trigger trig;
 	
 	if( (trig = (h_trigger)malloc(sizeof(t_trigger))) == NULL ) {

@@ -26,6 +26,9 @@
         "controls.h": "c",
         "glfw3.h": "c",
         "linmath.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "__locale": "c",
+        "cmath": "c",
+        "complex": "c"
     }
 }

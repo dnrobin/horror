@@ -9,16 +9,16 @@ float rad(const float deg) {
 	return PI * deg / 180.0;
 }
 
-float dist(const t_vec3 p1, const t_vec3 p2) {
+float dist(const vec3_t p1, const vec3_t p2) {
 	float d;
 	
-	d = norm( sub( p1, p2 ) );
+	d = norm( vec3_sub( p1, p2 ) );
 	
 	return d;
 }
 
-t_vec3 sub(const t_vec3 v1, const t_vec3 v2) {
-	t_vec3 r;
+vec3_t vec3_sub(const vec3_t v1, const vec3_t v2) {
+	vec3_t r;
 	
 	r.x = v1.x - v2.x;
 	r.y = v1.y - v2.y;
@@ -27,8 +27,8 @@ t_vec3 sub(const t_vec3 v1, const t_vec3 v2) {
 	return r;
 }
 
-t_vec3 add(const t_vec3 v1, const t_vec3 v2) {
-	t_vec3 r;
+vec3_t vec3_add(const vec3_t v1, const vec3_t v2) {
+	vec3_t r;
 	
 	r.x = v1.x + v2.x;
 	r.y = v1.y + v2.y;
@@ -37,7 +37,7 @@ t_vec3 add(const t_vec3 v1, const t_vec3 v2) {
 	return r;
 }
 
-float dot(const t_vec3 v1, const t_vec3 v2) {
+float vec3_dot(const vec3_t v1, const vec3_t v2) {
 	float r;
 	
 	r = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
@@ -45,8 +45,8 @@ float dot(const t_vec3 v1, const t_vec3 v2) {
 	return r;
 }
 
-t_vec3 scale(const t_vec3 v, float k) {
-	t_vec3 r;
+vec3_t vec3_scale(const vec3_t v, float k) {
+	vec3_t r;
 	
 	r.x = v.x * k;
 	r.y = v.y * k;
@@ -55,8 +55,8 @@ t_vec3 scale(const t_vec3 v, float k) {
 	return r;
 }
 
-t_vec3 cross(const t_vec3 v1, const t_vec3 v2) {
-	t_vec3 r;
+vec3_t vec3_cross(const vec3_t v1, const vec3_t v2) {
+	vec3_t r;
 	
 	r.x = v1.y * v2.z - v1.z * v2.y;
 	r.y = v1.z * v2.x - v1.x * v2.z;
@@ -65,9 +65,9 @@ t_vec3 cross(const t_vec3 v1, const t_vec3 v2) {
 	return r;
 }
 
-t_vec3 normalize(const t_vec3 v) {
+vec3_t vec3_normalize(const vec3_t v) {
 	float l;
-	t_vec3 r;
+	vec3_t r;
 	
 	l = norm(v);
 	
@@ -78,7 +78,7 @@ t_vec3 normalize(const t_vec3 v) {
 	return r;
 }
 
-float norm(const t_vec3 v) {
+float norm(const vec3_t v) {
 	float l;
 	
 	l = (float)sqrt( v.x*v.x + v.y*v.y + v.z*v.z );
@@ -86,15 +86,15 @@ float norm(const t_vec3 v) {
 	return l;
 }
 
-float angle(const t_vec3 v1, const t_vec3 v2) {
-	float angle;
+float vec3_angle(const vec3_t v1, const vec3_t v2) {
+	float vec3_angle;
 	
-	angle = acos( dot(v1, v2) / ( norm(v1) * norm(v2) ) );
+	vec3_angle = acos( vec3_dot(v1, v2) / ( norm(v1) * norm(v2) ) );
 	
-	return angle;
+	return vec3_angle;
 }
 
-void v_rot(t_vec3* v, const float x, const float y, const float z) {
+void v_rot(vec3_t* v, const float x, const float y, const float z) {
 	float cx = cos(x), sx = sin(x);
 	float cy = cos(y), sy = sin(y);
 	float cz = cos(z), sz = sin(z);
@@ -114,7 +114,7 @@ void v_rot(t_vec3* v, const float x, const float y, const float z) {
 	v->z = vz;
 }
 
-void v_rot_about_u(t_vec3* v, const t_vec3 u, const float t) {	// t in radians
+void v_rot_about_u(vec3_t* v, const vec3_t u, const float t) {	// t in radians
 
 	float u_x = u.x, u_xx = u.x*u.x;
 	float u_y = u.y, u_yy = u.y*u.y;
@@ -135,20 +135,20 @@ void v_rot_about_u(t_vec3* v, const t_vec3 u, const float t) {	// t in radians
 	v->z *= u_x*u_z*cc+u_y*s + u_y*u_z*cc-u_x*s + u_zz+(1-u_zz)*c;
 }
 
-void vcpy(t_vec3* destination, const t_vec3* origin) {
+void vcpy(vec3_t* destination, const vec3_t* origin) {
 	destination->x = origin->x;
 	destination->y = origin->y;
 	destination->z = origin->z;
 }
 
-int vcmpr(t_vec3* v1, t_vec3* v2) {
+int vcmpr(vec3_t* v1, vec3_t* v2) {
 	if (v1->x == v2->x &&
 		v1->y == v2->y &&
 		v1->z == v2->z ) return 1;
 	return 0;
 }
 
-t_vec3 vec3(const float x, const float y, const float z) {
-	t_vec3 v = (t_vec3){ x, y, z };
+vec3_t vec3(const float x, const float y, const float z) {
+	vec3_t v = (vec3_t){ x, y, z };
 	return v;
 }

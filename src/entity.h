@@ -29,9 +29,9 @@ typedef enum {
 
 /* structures */
 typedef struct entity {
-	t_vec3 position;			// center world coordinates
-	t_vec3 direction;			// front facing normal
-	t_vec3 up;					// up facing normal
+	vec3_t position;			// center world coordinates
+	vec3_t direction;			// front facing normal
+	vec3_t up;					// up facing normal
 	unsigned char collides; 	// wether a collision map should be implemented
 	unsigned char state;		// state flags
 	unsigned char type;			// type of entity
@@ -44,7 +44,7 @@ unsigned int g_unregister_entity(unsigned int);			// removes entity from list by
 int g_destroy_entity(h_entity);							// destroy entity object
 void g_position_entity();
 void g_rotate_entity();
-void g_point_entity(h_entity, t_vec3);
+void g_point_entity(h_entity, vec3_t);
 void g_point_entity_to_entity(h_entity, h_entity);
 void g_set_entity_state(h_entity, unsigned char state_id, unsigned char state);
 

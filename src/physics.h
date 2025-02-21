@@ -4,11 +4,11 @@
 #include "math.h"
 
 typedef struct t_physics_particle {
-	t_vec3 cur_pos;
-	t_vec3 last_pos;
-	t_vec3 force;
-	t_vec3 vel;
-	t_vec3 accel;
+	vec3_t cur_pos;
+	vec3_t last_pos;
+	vec3_t force;
+	vec3_t vel;
+	vec3_t accel;
 	float mass;
 } t_physics_particle, *h_physics_particle;
 

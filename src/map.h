@@ -14,19 +14,19 @@ typedef struct t_map_descriptor {
 
 typedef struct t__face {
 	uint type;				// real face type (3 or 4)
-	t_vec3 verts[4];		// extra vector if type 3
-	t_vec2 tcoords[4];		// same
+	vec3_t verts[4];		// extra vector if type 3
+	vec2_t tcoords[4];		// same
 	t_cRGBA colors[4];
-	t_vec3 normal;
+	vec3_t normal;
 	uint texid;
 } t__face;
 
 typedef struct t__face2 {
 	uint type;				// real face type (3 or 4)
-	t_vec3 verts[4];		// extra vector if type 3
-	t_vec2 tcoords[4];		// same
+	vec3_t verts[4];		// extra vector if type 3
+	vec2_t tcoords[4];		// same
 	t_cRGBA colors[4];
-	t_vec3 normal;
+	vec3_t normal;
 	uint tex_diffuse_id;	// RGB color (3D)
 	uint tex_specular_id;	// Specular map (1D)
 	uint tex_height_id;		// Height value (1D)
@@ -48,6 +48,6 @@ t_face4* convertFace4( const t__face* );
 //t__face convertFace( const t_face3* );
 //t__face convertFace( const t_face4* );
 
-#define NSUBDIVS 3
+#define NDIVS 3
 
 #endif

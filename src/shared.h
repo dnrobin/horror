@@ -18,4 +18,9 @@
 #define debug_print(fmt,...)
 #endif
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+extern GLFWwindow *g_win;
+
 #endif

@@ -306,13 +306,13 @@ int loadMap(const char* filename) {
 		*/
 		
 		// set collision surfaces
-		g_collisions[i].v1 = (t_vec3){ face->verts[0].x, (face->normal.y==1.0?-0.35:face->verts[0].y), face->verts[0].z };
-		g_collisions[i].v2 = (t_vec3){ face->verts[1].x, (face->normal.y==1.0?-0.35:face->verts[1].y), face->verts[1].z };
-		g_collisions[i].v3 = (t_vec3){ face->verts[2].x, (face->normal.y==1.0?-0.35:face->verts[2].y), face->verts[2].z };
-		g_collisions[i].v4 = (t_vec3){ face->verts[3].x, (face->normal.y==1.0?-0.35:face->verts[3].y), face->verts[3].z };
-		g_collisions[i].normal = (t_vec3){ face->normal.x, face->normal.y, face->normal.z };
+		g_collisions[i].v1 = (vec3_t){ face->verts[0].x, (face->normal.y==1.0?-0.35:face->verts[0].y), face->verts[0].z };
+		g_collisions[i].v2 = (vec3_t){ face->verts[1].x, (face->normal.y==1.0?-0.35:face->verts[1].y), face->verts[1].z };
+		g_collisions[i].v3 = (vec3_t){ face->verts[2].x, (face->normal.y==1.0?-0.35:face->verts[2].y), face->verts[2].z };
+		g_collisions[i].v4 = (vec3_t){ face->verts[3].x, (face->normal.y==1.0?-0.35:face->verts[3].y), face->verts[3].z };
+		g_collisions[i].normal = (vec3_t){ face->normal.x, face->normal.y, face->normal.z };
 		
-		// draw subdivision surfaces for better lighting
+		// draw vec3_sub(division surfaces for better lighting
 		glBindTexture(GL_TEXTURE_2D, g_textures[face->texid]);
 		glLineWidth(5);
 		
@@ -341,18 +341,18 @@ void subdivision4(const t_face4* face, const int _u, const int _v, const int ndi
 	
 	int i, j;
 	
-	t_vec3 v1 = face->vertices[0];
-	t_vec3 v2 = face->vertices[1];
-	t_vec3 v3 = face->vertices[2];
-	t_vec3 v4 = face->vertices[3];
+	vec3_t v1 = face->vertices[0];
+	vec3_t v2 = face->vertices[1];
+	vec3_t v3 = face->vertices[2];
+	vec3_t v4 = face->vertices[3];
 	
 	// calculate new face vertices
-	t_vec3 v[] = {
-		add( scale( sub( v2, v1 ), 0.5 ), v1 ),	// v[0]
-		add( scale( sub( v3, v2 ), 0.5 ), v2 ),	// v[1]
-		add( scale( sub( v4, v3 ), 0.5 ), v3 ),	// v[2]
-		add( scale( sub( v1, v4 ), 0.5 ), v4 ),	// v[3]
-		add( scale( sub( v3, v1 ), 0.5 ), v1 )		// v[4]
+	vec3_t v[] = {
+		vec3_add( vec3_scale( vec3_sub( v2, v1 ), 0.5 ), v1 ),	// v[0]
+		vec3_add( vec3_scale( vec3_sub( v3, v2 ), 0.5 ), v2 ),	// v[1]
+		vec3_add( vec3_scale( vec3_sub( v4, v3 ), 0.5 ), v3 ),	// v[2]
+		vec3_add( vec3_scale( vec3_sub( v1, v4 ), 0.5 ), v4 ),	// v[3]
+		vec3_add( vec3_scale( vec3_sub( v3, v1 ), 0.5 ), v1 )		// v[4]
 	};
 	
 	// create new faces

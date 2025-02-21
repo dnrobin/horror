@@ -15,27 +15,27 @@ typedef struct RGBA {
 } t_cRGBA, t_RGBA;
 
 typedef struct t_face3 {
-	t_vec3 vertices[3];
-	t_vec2 texcoords[3];
+	vec3_t vertices[3];
+	vec2_t texcoords[3];
 	t_cRGBA colors[3];
-	t_vec3 normal;
+	vec3_t normal;
 	uint texid;
 } t_face3;
 
 typedef struct t_face4 {
-	t_vec3 vertices[4];
-	t_vec2 texcoords[4];
+	vec3_t vertices[4];
+	vec2_t texcoords[4];
 	t_cRGBA colors[4];
-	t_vec3 normal;
+	vec3_t normal;
 	uint texid;
 } t_face4;
 
 
 /* structure to hold a single vertex description */
 typedef struct vertex {
-	t_vec3 v;						// vertex coordinates
+	vec3_t v;						// vertex coordinates
 	t_RGBA color;					// rgba color values
-	t_vec2 tcoord;					// texture coordinates
+	vec2_t tcoord;					// texture coordinates
 	struct face* parent;			// pointer to parent face
 } t_vertex, *h_vertex;
 
@@ -44,7 +44,7 @@ typedef struct face {
 	unsigned char options;				// face option bits
 	unsigned char group;				// group id used for AI and game progress (max 256 values)
 	unsigned char texture_id;			// resource id of texture (max 256 values)
-	t_vec3 normal;						// normal vector
+	vec3_t normal;						// normal vector
 	t_vertex** vertices;				// contigeous array of pointers to vertices
 	unsigned short nb_vertices;			// number of vertices in array
 } t_face, *h_face;

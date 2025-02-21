@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 static GLFWwindow *win = NULL;
+GLFWwindow *g_win;
 
 uint g_window_width = 1080;
 uint g_window_height = 675;
@@ -72,9 +73,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (action == GLFW_PRESS) {
 		i_handle_key_down(key, mods);
+		/* TO BE REMOVED */
+		handleKeyDown(key, 0, 0);
 	}
 	else {
 		i_handle_key_up(key, mods);
+		/* TO BE REMOVED */
+		handleKeyUp(key, 0, 0);
 	}
 }
 
@@ -86,12 +91,16 @@ void joystick_callback(int jid, int event)
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	i_handle_mouse_motion(xpos, ypos);
+	/* TO BE REMOVED */
+	handleMouseMove(xpos, ypos);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (action == GLFW_PRESS) {
 		i_handle_mouse_button_down(button);
+		/* TO BE REMOVED */
+		handleMouseDown(button,action,0,0);
 	}
 	else {
 		i_handle_mouse_button_up(button);
@@ -115,6 +124,8 @@ int main(int argc, char* argv[])
 	// GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM | GLUT_RGBA | GLUT_ALPHA
 
 	win = glfwCreateWindow(800,600,"Horror Maze Game",NULL,NULL);
+
+	g_win = win;
 
     glfwMakeContextCurrent(win);
 
@@ -174,7 +185,7 @@ int main(int argc, char* argv[])
             glfwSwapBuffers(win);
 
 			// warp mouse back to center
-			glfwSetCursorPos(win, g_window_width/2, g_window_height/2);
+			// glfwSetCursorPos(win, g_window_width/2, g_window_height/2);
 
             oldtime = time;
         }

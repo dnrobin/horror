@@ -95,8 +95,8 @@ t_sound_resource_descriptor sounds[] = {
 };
 
 // typedef struct t_light {
-// 	t_vec3 position;
-// 	t_vec3 direction;
+// 	vec3_t position;
+// 	vec3_t direction;
 // 	float color_ambient[3];
 // 	float color_diffuse[3];
 // 	float color_specular[3];
@@ -105,7 +105,7 @@ t_sound_resource_descriptor sounds[] = {
 // 	float atten_factor_lin;
 // 	float atten_factor_quad;
 // 	float atten_factor_exp;
-// 	float angle;
+// 	float vec3_angle;
 // } t_light;
 
 // int lights_count = 7;
@@ -650,21 +650,21 @@ void update(double dt) {
 			if ( !g_state[G_PHY_CLIPPING] ) {
 				c_camera_move_forward(&g_game_camera, distance);
 			} else {
-				c_camera_move(&g_game_camera, scale(normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), distance));
+				c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), distance));
 			}
 		}
 		if ( g_state[G_MOVING_BACKWARD] ) {
 			if ( !g_state[G_PHY_CLIPPING] ) {
 				c_camera_move_backward(&g_game_camera, distance);
 			} else {
-				c_camera_move(&g_game_camera, scale(normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), -distance));
+				c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), -distance));
 			}
 		}
 		if ( g_state[G_MOVING_LEFT] ) {
-			c_camera_move(&g_game_camera, scale(normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), -distance));
+			c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), -distance));
 		}
 		if ( g_state[G_MOVING_RIGHT] ) {
-			c_camera_move(&g_game_camera, scale(normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), distance));
+			c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), distance));
 		}
 	}
 
@@ -870,7 +870,7 @@ void update(double dt) {
 			array_set_internal_position(g_triggers, 0);
 			for ( i = 0; i < g_triggers->count; i ++ ) {
 				trigger = array_next(g_triggers);
-				if ( norm(sub(g_game_camera.position, trigger->position)) < 0.7 ) {
+				if ( norm(vec3_sub(g_game_camera.position, trigger->position)) < 0.7 ) {
 					fireTrigger(trigger);
 				}
 			}
