@@ -29,6 +29,7 @@
         "math.h": "c",
         "__locale": "c",
         "cmath": "c",
-        "complex": "c"
+        "complex": "c",
+        "collision.h": "c"
     }
 }

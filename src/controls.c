@@ -5,10 +5,79 @@
 #include "sound.h"
 #include "game.h"
 
+#include "input.h"
+
 #include "math.h"
+
+#include <math.h>
 
 #include <stdlib.h>
 #include <GLUT/glut.h>
+
+
+static struct { int x, y; } old_coords;
+static struct { float pitch, yaw; } look_angles;
+
+void c_init_controls()
+{
+	look_angles.pitch = 0;
+	look_angles.yaw = 0;
+
+	old_coords.x = g_window_width/2;
+	old_coords.y = g_window_height/2;
+}
+
+void c_update_controls(double dt)
+{
+	int xpos, ypos;
+
+	i_get_mouse_coordinates(&xpos, &ypos);
+
+	printf("xpos: %i, ypos: %i\n", xpos, ypos);
+
+	// convert to normalized screen coordinates
+	// Note: since we warp mouse back to center every frame,
+	// these coordinates are actually deltas from one frame
+	// to the next.
+	float delta_x = (xpos - old_coords.x) / (float)g_window_width;
+	float delta_y = (ypos - old_coords.y) / (float)g_window_height;
+
+	old_coords.x = xpos;
+	old_coords.y = ypos;
+
+	printf("delta_x: %f, delta_y: %f\n", delta_x, delta_y);
+
+	float mouse_y_dir = +1;
+	if (g_mouse_invert_y) {
+		mouse_y_dir = -1;
+	}
+
+	look_angles.pitch += delta_y * g_mouse_sensitivity * mouse_y_dir;
+	look_angles.yaw   += delta_x * g_mouse_sensitivity;
+
+	printf("pitch: %f, yaw: %f\n", look_angles.pitch, look_angles.yaw);
+
+	printf("\n");
+
+	if(look_angles.pitch > M_PI_2) {
+		look_angles.pitch = M_PI_2;
+	}
+
+	if(look_angles.pitch < -M_PI_2) {
+		look_angles.pitch = -M_PI_2;
+	}
+
+	// upate camera look direction
+	g_camera->look.x = cosf(look_angles.yaw) * cosf(look_angles.pitch);
+	g_camera->look.y = sinf(look_angles.pitch);
+	g_camera->look.z = sinf(look_angles.yaw) * cosf(look_angles.pitch);
+
+	c_camera_update_referential(g_camera);
+
+	/* TO BE REMOVED... */
+	g_camera->rotation.x = look_angles.pitch;
+	g_camera->rotation.y = M_PI_2 + look_angles.yaw;
+}
 
 void handleSpecialKeyDown(int key, int x, int y)
 {
@@ -146,9 +215,9 @@ void handleMouseMove(const int x, const int y) {
 	// calculate mouse speed
 	float speed_x = (float)( x - old_x ) / g_window_width;
 	
-    g_game_camera.rotation.y += g_mouse_sensitivity * 2 * PI * speed_x;
-    g_game_camera.rotation.x = ( g_mouse_invert_y ? -1.0 : 1.0 ) * PI * ( (float)y / g_window_height - 0.5 );
-    c_camera_update_referential(&g_game_camera);
+    g_camera->rotation.y += g_mouse_sensitivity * 2 * PI * speed_x;
+    g_camera->rotation.x = ( g_mouse_invert_y ? -1.0 : 1.0 ) * PI * ( (float)y / g_window_height - 0.5 );
+    c_camera_update_referential(&g_camera);
 	
 	old_x = x;
 	

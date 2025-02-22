@@ -21,6 +21,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+/* TO BE REMOVED */
 extern GLFWwindow *g_win;
 
 #endif

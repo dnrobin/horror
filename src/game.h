@@ -30,7 +30,7 @@ float g_player_walk_speed;
 float g_player_crouch_speed;
 
 /* global object variables */
-t_camera g_game_camera;
+extern camera_t *g_camera;
 
 /* window state variables */
 uint g_window_width;

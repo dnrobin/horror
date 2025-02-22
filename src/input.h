@@ -1,18 +1,21 @@
 #ifndef MAZ_INPUT_H
 #define MAZ_INPUT_H
 
+void i_handle_mouse_position_change(int x, int y);
+void i_get_mouse_coordinates(int *x, int *y);
+
+
+
+
 bool get_key(int key);
 bool get_mouse_button(int key);
-void get_mouse_pos(double *x, double *y);
 
 void i_handle_key_down(int key, int modifiers);
 void i_handle_key_up(int key, int modifiers);
 void i_handle_mouse_button_down(int button);
 void i_handle_mouse_button_up(int button);
-void i_handle_mouse_motion(double x, double y);
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+
 
 enum {
     KEY_UNKNOWN             = GLFW_KEY_UNKNOWN,

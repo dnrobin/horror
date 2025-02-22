@@ -90,9 +90,7 @@ void joystick_callback(int jid, int event)
 
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	i_handle_mouse_motion(xpos, ypos);
-	/* TO BE REMOVED */
-	handleMouseMove(xpos, ypos);
+	i_handle_mouse_position_change(xpos, ypos);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -149,10 +147,12 @@ int main(int argc, char* argv[])
     glfwSwapInterval(1);
     glfwShowWindow(win);
 
-	glfwSetWindowUserPointer(win, NULL);
 	glfwSetInputMode(win, GLFW_STICKY_KEYS, GLFW_TRUE);
 	glfwSetInputMode(win, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
+	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	
 	if (glfwRawMouseMotionSupported()) {
+		// glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     	glfwSetInputMode(win, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	}
 
@@ -183,9 +183,6 @@ int main(int argc, char* argv[])
 			update(dt);
 
             glfwSwapBuffers(win);
-
-			// warp mouse back to center
-			// glfwSetCursorPos(win, g_window_width/2, g_window_height/2);
 
             oldtime = time;
         }

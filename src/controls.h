@@ -10,4 +10,7 @@ void handleKeyUp(unsigned char key, int x, int y);
 void handleMouseDown(int button, int state, int x, int y);
 void handleMouseMove(const int x, const int y);
 
+void c_init_controls();
+void c_update_controls(double dt);
+
 #endif

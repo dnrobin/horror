@@ -1,11 +1,24 @@
 #include "shared.h"
 #include "input.h"
 
-#include <GLFW/glfw3.h>
+static struct { int x; int y; } mouse_position = {0};
+
+void i_handle_mouse_position_change(int x, int y)
+{
+    mouse_position.x = x;
+    mouse_position.y = y;
+}
+
+void i_get_mouse_coordinates(int *x, int *y)
+{
+    *x = mouse_position.x;
+    *y = mouse_position.y;
+}
+
+
 
 static bool keys[GLFW_KEY_LAST] = {0};
 static bool btns[GLFW_MOUSE_BUTTON_LAST] = {0};
-static double mouse_x, mouse_y;
 
 bool get_key(int key)
 {
@@ -25,11 +38,7 @@ bool get_mouse_button(int button)
     return btns[button];
 }
 
-void get_mouse_pos(double *x, double *y)
-{
-    *x = mouse_x;
-    *y = mouse_y;
-}
+
 
 void i_handle_key_down(int key, int modifiers)
 {
@@ -49,10 +58,4 @@ void i_handle_mouse_button_down(int button)
 void i_handle_mouse_button_up(int button)
 {
     btns[button] = false;
-}
-
-void i_handle_mouse_motion(double x, double y)
-{
-    mouse_x = x;
-    mouse_y = y;
 }

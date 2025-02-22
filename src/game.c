@@ -15,6 +15,16 @@
 #include <math.h>
 #include <stdlib.h>
 
+// private game state
+static camera_t game_camera;
+
+// set global pointers
+camera_t *g_camera = &game_camera;
+
+
+
+/* TO BE MOVED */
+
 // ********************************************************************
 // BEGIN MAP RESOURCE DEFINITIONS
 // ********************************************************************
@@ -317,6 +327,8 @@ void shutdown() {
 
 void init() {
 
+	c_init_controls();
+
 	/*********************************************
 	// YARKE YARKE YARKE!!!
 	/*******************************************/
@@ -392,8 +404,8 @@ void init() {
 	g_camera_physics_model.vel = vec3(0, 0, 0);
 	g_camera_physics_model.accel = vec3(0.0, -10.0, 0.0);
 	
-	c_camera_set_pos( &g_game_camera, start_x, -0.2, start_z );
-	c_camera_set_rot( &g_game_camera, 0.0, 0.0, 0.0 );
+	c_camera_set_pos( g_camera, start_x, -0.2, start_z );
+	c_camera_set_rot( g_camera, 0.0, 0.0, 0.0 );
 	
 	/* moving speeds */
 	g_player_crouch_speed = 0.56;	 // units/sec
@@ -648,25 +660,27 @@ void update(double dt) {
 
 		if ( g_state[G_MOVING_FORWARD] ) {
 			if ( !g_state[G_PHY_CLIPPING] ) {
-				c_camera_move_forward(&g_game_camera, distance);
+				c_camera_move_forward(g_camera, distance);
 			} else {
-				c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), distance));
+				c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->look.x, 0, g_camera->look.z)), distance));
 			}
 		}
 		if ( g_state[G_MOVING_BACKWARD] ) {
 			if ( !g_state[G_PHY_CLIPPING] ) {
-				c_camera_move_backward(&g_game_camera, distance);
+				c_camera_move_backward(g_camera, distance);
 			} else {
-				c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.forward.x, 0, g_game_camera.forward.z)), -distance));
+				c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->look.x, 0, g_camera->look.z)), -distance));
 			}
 		}
 		if ( g_state[G_MOVING_LEFT] ) {
-			c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), -distance));
+			c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->right.x, 0, g_camera->right.z)), -distance));
 		}
 		if ( g_state[G_MOVING_RIGHT] ) {
-			c_camera_move(&g_game_camera, vec3_scale(vec3_normalize(vec3(g_game_camera.right.x, 0, g_game_camera.right.z)), distance));
+			c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->right.x, 0, g_camera->right.z)), distance));
 		}
 	}
+
+	c_update_controls(dt);
 
 	if ( GL_DEBUG_GEOMETRY_MODE ) return;
 	
@@ -677,7 +691,7 @@ void update(double dt) {
 	updateStressResponse();
 
 	/* update player sound perception */
-	sound_update_listener(&g_game_camera.position, &g_game_camera.forward, &g_game_camera.up);
+	sound_update_listener(&g_camera->position, &g_camera->look, &g_camera->up);
 	
 	if ( g_state[G_PHY_CLIPPING] ) {
 		
@@ -761,8 +775,8 @@ void update(double dt) {
 				g_state[G_PLAYER_LOOK_FRANTIC] = false;
 				just_got_frantic = false;
 			}
-			c_camera_set_pos_offset(&g_game_camera, 0.0, player_croutch_y, 0.0);
-			c_camera_set_rot_offset(&g_game_camera, looking_v, looking_h, 0.0);
+			c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+			c_camera_set_rot_offset(g_camera, looking_v, looking_h, 0.0);
 			g_state[G_PLAYER_MOVING] = false;
 		}
 		
@@ -780,20 +794,20 @@ void update(double dt) {
 				g_state[G_PLAYER_LOOK_BEHIND] = false;
                 look_behind_ready = true;
                 just_began_looking_behind = false;
-                c_camera_set_rot(&g_game_camera, looking_v, c*looking_h, 0.0);
-                c_camera_set_rot_offset(&g_game_camera, 0.0, 0.0, 0.0);
+                c_camera_set_rot(g_camera, looking_v, c*looking_h, 0.0);
+                c_camera_set_rot_offset(g_camera, 0.0, 0.0, 0.0);
 			}
 			else {
-				c_camera_set_pos_offset(&g_game_camera, 0.0, player_croutch_y, 0.0);
-				c_camera_set_rot_offset(&g_game_camera, looking_v, c*looking_h, 0.0);
+				c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+				c_camera_set_rot_offset(g_camera, looking_v, c*looking_h, 0.0);
 				g_state[G_PLAYER_MOVING] = false;
 			}
 		}
 		
 		else {
 			// player idle animation
-			c_camera_set_pos_offset(&g_game_camera, 0.0, player_croutch_y, 0.0);
-			c_camera_set_rot_offset(&g_game_camera, vertical_stress_influence + 0.01 * (1.0 - sin(PI*t)), looking_influence + horizontal_stress_influence, 0);
+			c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+			c_camera_set_rot_offset(g_camera, vertical_stress_influence + 0.01 * (1.0 - sin(PI*t)), looking_influence + horizontal_stress_influence, 0);
 		}
         
         // FIX ME: WHENEVER IDLE FOR A SEC HE SETS UP A TIMER!
@@ -810,8 +824,8 @@ void update(double dt) {
 			
 			float o = 6.0 * (0.5 - cos(4*PI*t*g_walking_animation_rate)); o = o < 0 ? o : 0;
 			
-			c_camera_set_pos_offset(&g_game_camera, 0.0, player_croutch_y + 0.008 * o + 0.01 * (1.0 - sin(3*PI*g_walking_animation_rate*t)), -0.003*o);
-			c_camera_set_rot_offset(&g_game_camera,
+			c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y + 0.008 * o + 0.01 * (1.0 - sin(3*PI*g_walking_animation_rate*t)), -0.003*o);
+			c_camera_set_rot_offset(g_camera,
 					vertical_stress_influence + 0.005 * o - 0.02 * sin(2*PI*g_walking_animation_rate*t),
 					looking_influence + horizontal_stress_influence - 0.03 * sin(2*PI*g_walking_animation_rate*t) + 0.005 * (1.0 - sin(3*PI*g_walking_animation_rate*t)),
 					0);
@@ -850,17 +864,17 @@ void update(double dt) {
 	if ( g_state[G_PHY_CLIPPING] ) {
 		/* do some basic physics */
 		if ( !g_state[G_DEBUG_PHYSICS] ) {
-			vcpy( &g_camera_physics_model.cur_pos,&g_game_camera.position);
+			vcpy(&g_camera_physics_model.cur_pos,&g_camera->position);
 		
 			/* NO PHYSICS YET, CHECK BACK SOON! */
 		
 			/* check collisions */
-			vcpy( &g_camera_collision_model.center,&g_camera_physics_model.cur_pos);
-			bool collided = detectCollision( &g_camera_collision_model, g_collisions_count, g_collisions );
-			vcpy( &g_camera_physics_model.cur_pos,&g_camera_collision_model.center);
+			vcpy(&g_camera_collision_model.center,&g_camera_physics_model.cur_pos);
+			bool collided = detectCollision(&g_camera_collision_model, g_collisions_count, g_collisions );
+			vcpy(&g_camera_physics_model.cur_pos,&g_camera_collision_model.center);
 		
 			// update camera position
-			vcpy( &g_game_camera.position,&g_camera_physics_model.cur_pos);
+			vcpy(&g_camera->position,&g_camera_physics_model.cur_pos);
 		}
 
 		/* check "collision" with triggers */
@@ -870,7 +884,7 @@ void update(double dt) {
 			array_set_internal_position(g_triggers, 0);
 			for ( i = 0; i < g_triggers->count; i ++ ) {
 				trigger = array_next(g_triggers);
-				if ( norm(vec3_sub(g_game_camera.position, trigger->position)) < 0.7 ) {
+				if ( norm(vec3_sub(g_camera->position, trigger->position)) < 0.7 ) {
 					fireTrigger(trigger);
 				}
 			}

@@ -49,10 +49,16 @@ void display() {
  	snprintf (buf, sizeof(buf), "FPS : %f", FPS);
     // printScreen(10, 10, 1.0, 1.0, 1.0, buf);
 
-	glRotatef(deg(g_game_camera.rotation.x+g_game_camera.rotation_offset.x), 1.0, 0.0, 0.0);
-	glRotatef(deg(g_game_camera.rotation.y+g_game_camera.rotation_offset.y), 0.0, 1.0, 0.0);
+	// pitch tilt..
+	glRotatef(deg(g_camera->rotation.x + g_camera->rotation_offset.x), 1.0, 0.0, 0.0);
+	// yaw tilt..
+	glRotatef(deg(g_camera->rotation.y + g_camera->rotation_offset.y), 0.0, 1.0, 0.0);
 	
-	glTranslatef(-g_game_camera.position.x-g_game_camera.position_offset.x, -g_game_camera.position.y-g_game_camera.position_offset.y, -g_game_camera.position.z-g_game_camera.position_offset.z);
+	glTranslatef(
+		-(g_camera->position.x + g_camera->position_offset.x),
+		-(g_camera->position.y + g_camera->position_offset.y),
+		-(g_camera->position.z + g_camera->position_offset.z)
+	);
 
 	// show wireframe
 	if ( g_state[G_SHOW_WIREFRAME] ) {
@@ -68,25 +74,25 @@ void display() {
 
 	// create light source to follow player around
 	vec3_t light_offset = (vec3_t){-0.16, -0.02, -0.35};
-	v_rot(&light_offset, -0.5*g_game_camera.rotation.x, -g_game_camera.rotation.y, 0);
+	v_rot(&light_offset, -0.5*g_camera->rotation.x, -g_camera->rotation.y, 0);
 		if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
 			v_rot(&light_offset,
-        		-g_game_camera.rotation_offset.x,
-        		-g_game_camera.rotation_offset.y,
-        		-g_game_camera.rotation_offset.z);
+        		-g_camera->rotation_offset.x,
+        		-g_camera->rotation_offset.y,
+        		-g_camera->rotation_offset.z);
         }
 	float light_position[] = { 
-		g_game_camera.position.x + light_offset.x,
-		g_game_camera.position.y + light_offset.y - 0.3*g_game_camera.rotation.x,
-		g_game_camera.position.z + light_offset.z,
+		g_camera->position.x + light_offset.x,
+		g_camera->position.y + light_offset.y - 0.3*g_camera->rotation.x,
+		g_camera->position.z + light_offset.z,
 		1.0 };
 
-	float light_direction[] = { g_game_camera.forward.x, g_game_camera.forward.y, g_game_camera.forward.z, 1.0 };
+	float light_direction[] = { g_camera->look.x, g_camera->look.y, g_camera->look.z, 1.0 };
 	    if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
         	v_rot(&light_direction,
-        		-g_game_camera.rotation_offset.x,
-        		-g_game_camera.rotation_offset.y,
-        		-g_game_camera.rotation_offset.z);
+        		-g_camera->rotation_offset.x,
+        		-g_camera->rotation_offset.y,
+        		-g_camera->rotation_offset.z);
         }
 
 
@@ -217,17 +223,17 @@ void display() {
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_game_camera.forward.x, g_game_camera.forward.y, g_game_camera.forward.z);
+			glVertex3f(g_camera->look.x, g_camera->look.y, g_camera->look.z);
 		glEnd();
 		glColor3f(1.0, 1.0, 0.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_game_camera.up.x, g_game_camera.up.y, g_game_camera.up.z);
+			glVertex3f(g_camera->up.x, g_camera->up.y, g_camera->up.z);
 		glEnd();
 		glColor3f(0.0, 0.0, 1.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_game_camera.right.x, g_game_camera.right.y, g_game_camera.right.z);
+			glVertex3f(g_camera->right.x, g_camera->right.y, g_camera->right.z);
 		glEnd();
 		glPopMatrix();
 	}
