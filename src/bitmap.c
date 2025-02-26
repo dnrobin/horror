@@ -3,45 +3,38 @@
 
 #include <stdlib.h>
 
-h_bitmap loadBitmapImageFromFile(const char* filename) {
-    
+int f_load_bitmap_file(const char* filename, bitmap_t *image)
+{
 	FILE* fp;
-	h_bitmap image;
+
 	unsigned size, i;				// size of image in bytes
 	unsigned short int planes;		// number of planes in image (must be 1)
 	unsigned short int bpp;			// number of bits per pixel (must be 24 or 32)
 	unsigned int cmp;				// compression (must be 0)
 	char temp;						// used to convert bgr to rgb color
 
-	// register new bitmap to memory
-	if( (image = (h_bitmap)malloc(sizeof(t_bitmap))) == NULL ) {
-		printf("Error loading textures files.");
+	if( (fp = fopen(filename, "rb")) == NULL ) {
+		ERROR_RET("File not found '%s'.", filename);
 		return 0;
 	}
 
-	// try opening the file
-	if( (fp = fopen(filename, "rb")) == NULL ) {
-		printf("File not found: \"%s\"\n",filename);
-		return 0;
+	if( (image = (bitmap_t*)malloc(sizeof(bitmap_t))) == NULL ) {
+		ERROR_RET("Error allocating memory for texture file '%s'.", filename);
 	}
 
 	// move to the width/height values
 	fseek(fp, 18, SEEK_CUR);
 
-	// read width
-	if( (i = fread(&image->size_x, 4, 1, fp)) != 1 ) {
-		return 0;
+	if( (i = fread(&image->width, 4, 1, fp)) != 1 ) {
+		ERROR_RET("Error reading texture file '%s'.", filename);
 	}
-	//printf("Image width %d\n",image->size_x);
 
-	// read height
-	if( (i = fread(&image->size_y, 4, 1, fp)) != 1 ) {
-		return 0;
+	if( (i = fread(&image->height, 4, 1, fp)) != 1 ) {
+		ERROR_RET("Error reading texture file '%s'.", filename);
 	}
-	//printf("Image height %d\n",image->size_y);
 
 	// calculate size (assuming 24bit)
-	size = image->size_x * image->size_y * 3;
+	size = image->width * image->height * 3;
 
 	// read the planes
 	if( (fread(&planes, 2, 1, fp)) != 1 ) {
@@ -49,8 +42,7 @@ h_bitmap loadBitmapImageFromFile(const char* filename) {
 	}
 
 	if( planes != 1 ) {
-		printf("Wrong image file format: not right amount of planes\n");
-		return 0;
+		ERROR_RET("Wrong image file format: not right amount of planes in '%s'.", filename);
 	}
 
 	// read bpp
@@ -59,10 +51,8 @@ h_bitmap loadBitmapImageFromFile(const char* filename) {
 	}
 
 	if( bpp != 8 && bpp != 24 && bpp != 32 ) {
-		printf("Wrong image file format: wrong bits per pixel\n");
-		return 0;
+		ERROR_RET("Wrong image file format: wrong bits per pixel in '%s'.", filename);
 	}
-	//printf("bpp %d\n",bpp);
 
 	// read compression (should be 0)
 	if( (i = fread(&cmp, 4, 1, fp)) != 1 ) {
@@ -70,40 +60,44 @@ h_bitmap loadBitmapImageFromFile(const char* filename) {
 	}
 
 	if( cmp != 0 ) {
-		printf("Wrong image file format: wrong compression mode.\n");
-		//return 0;
+		ERROR_RET("Wrong image file format: wrong compression mode in '%s'.", filename);
 	}
-	//printf("compression %d\n",cmp);
 
 	// read size
 	if( (i = fread(&size, 4, 1, fp)) != 1 ) {
 		return 0;
 	}
-	//printf("Image size (bytes) %d\n",size);
 
-	// move ahead 
 	fseek(fp, 12, SEEK_CUR);
 
 	// read data
-	image->data = (unsigned char *)malloc(sizeof(unsigned char)*size);
-	if( image->data == NULL ) {
+	image->buffer = (unsigned char *)malloc(sizeof(unsigned char)*size);
+	if( image->buffer == NULL ) {
 		printf("Error allocation memory for texture images\n");
 		return 0;
 	}
-	if( (i = fread(image->data, size, 1, fp)) != 1 ) {
-		printf("Error reading image data from file\n");
+	if( (i = fread(image->buffer, size, 1, fp)) != 1 ) {
+		printf("Error reading image buffer from file\n");
 		return 0;
 	}
 	
 	if ( bpp == 24 ) {
+		// swap bgr to rgb
 		for ( i = 0; i < size; i += 3 ) {
-			temp = image->data[i + 2];
-			image->data[i + 2] = image->data[i + 1];
-			image->data[i + 1] = temp;
+			temp = image->buffer[i + 2];
+			image->buffer[i + 2] = image->buffer[i + 1];
+			image->buffer[i + 1] = temp;
 		}
+		image->has_alpha = false;
 	}
-	
+	else {
+		image->has_alpha = true;
+	}
+
+	image->bitdepth = bpp;
+	image->colors = bpp/8;
+
 	fclose(fp);
 
-	return image;
+	return STATUS_SUCCESS;
 }

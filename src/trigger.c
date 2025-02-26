@@ -12,6 +12,7 @@ void addTrigger(const vec3_t position, const void(*action)(), const char retrigg
 		return;
 	}
 	
+	
 	trig->retrigger = retrigger;
 	trig->retrigger_interval = retrigger_interval;
 	trig->retrigger_start_time = getSeconds();

@@ -1,8 +1,5 @@
-#ifndef __H_COLLISION__
-#define __H_COLLISION__
-
-#include "common.h"
-#include "math.h"
+#ifndef __MAZE_GAME_COLLISION_H__
+#define __MAZE_GAME_COLLISION_H__
 
 /* useful collision structure objects */
 typedef struct t_bounding_sphere {
@@ -24,6 +21,6 @@ typedef struct t_collision_surface {
 } t_collision_surface, *h_collision_surface;
 
 /* collision function prototypes */
-bool detectCollision( t_bounding_sphere* p, const int surfc, const h_collision_surface surfv );
+bool check_collisions( t_bounding_sphere* p, const int surfc, const h_collision_surface surfv );
 
 #endif

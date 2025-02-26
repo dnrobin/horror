@@ -1,11 +1,15 @@
-#ifndef MAZ_BITMAP_H
-#define MAZ_BITMAP_H
+#ifndef __MAZE_GAME_BITMAP_H__
+#define __MAZE_GAME_BITMAP_H__
 
 typedef struct t_bitmap {
-	int size_x, size_y;
-	unsigned char* data;
-} t_bitmap, *h_bitmap;
+	int width;
+	int height;
+	int colors;
+	int bitdepth;
+	bool has_alpha;
+	unsigned char* buffer;
+} bitmap_t;
 
-h_bitmap loadBitmapImageFromFile(const char* filename);
+int f_load_bitmap_file(const char* filename, bitmap_t *image);
 
 #endif

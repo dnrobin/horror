@@ -1,9 +1,7 @@
-#ifndef __SOUND_H__
-#define __SOUND_H__
+#ifndef __MAZE_GAME_SOUND_H__
+#define __MAZE_GAME_SOUND_H__
 
 #include <OpenAL/al.h>
-
-#include "math.h"
 
 #define MAX_SOUND_BUFFERS 32	// MAX POSSIBLE, ACTUAL NUMBER DEFINED AT RUNTIME
 #define MAX_SOUND_SOURCES 32	// SAME

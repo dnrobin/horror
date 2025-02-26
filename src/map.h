@@ -1,7 +1,6 @@
-#ifndef __MAP_H__
-#define __MAP_H__
+#ifndef __MAZE_GAME_MAP_H__
+#define __MAZE_GAME_MAP_H__
 
-#include "common.h"
 #include "geometry.h"
 
 #define GL_LIST_ID_MAP 				1

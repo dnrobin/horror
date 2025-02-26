@@ -10,7 +10,7 @@
 
 struct timeval g_time_keepers[16];
 
-void addTimer(const unsigned int interval, void(*callback)()) {
+void add_timer(const unsigned int interval, void(*callback)()) {
 
 	h_timer timer;
 	
@@ -30,7 +30,7 @@ void addTimer(const unsigned int interval, void(*callback)()) {
 	push_array(g_timers, timer);
 }
 
-void updateTimers() {
+void update_timers() {
 
 	int i;
 	h_timer timer;

@@ -1,6 +1,7 @@
 #include "shared.h"
 #include "sound.h"
 
+#include "gamedefs.h"
 #include "game.h"
 #include "res.h"
 

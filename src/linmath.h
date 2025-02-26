@@ -1,5 +1,5 @@
-#ifndef _MAZE_LINMATH_H_
-#define _MAZE_LINMATH_H_
+#ifndef __MAZE_GAME_LINMATH_H__
+#define __MAZE_GAME_LINMATH_H__
 
 #define PI 3.141592653589793
 

@@ -1,9 +1,6 @@
 #include "shared.h"
 #include "camera.h"
 
-#include "math.h"
-#include <math.h>
-
 
 void c_camera_update_referential(camera_t* cam) {
 	

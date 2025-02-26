@@ -30,6 +30,20 @@
         "__locale": "c",
         "cmath": "c",
         "complex": "c",
-        "collision.h": "c"
+        "collision.h": "c",
+        "types.h": "c",
+        "parson.h": "c",
+        "camera.h": "c",
+        "geometry.h": "c",
+        "stdio.h": "c",
+        "*.z": "c",
+        "gamedefs.h": "c",
+        "*.inc": "cpp",
+        "memory_resource": "c",
+        "logging.h": "c",
+        "cstdlib": "c",
+        "texture.h": "c",
+        "array": "c",
+        "bitmap.h": "c"
     }
 }

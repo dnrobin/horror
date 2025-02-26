@@ -1,10 +1,24 @@
-#ifndef SHADERS_H
-#define SHADERS_H
+#ifndef __MAZE_GAME_SHADERS_H__
+#define __MAZE_GAME_SHADERS_H__
 
-void setVertexShaderSource(const char** source, int len);
-void setFragmentShaderSource(const char** source, int len);
-void unloadShaderProgram();
-void initShaderProgram();
-int loadShaderSource(const char* filename, char** source, int *len);
+typedef struct {
+    uint                gl_handle;      // OpenGL handle to object
+
+    int                 mvp_location;   // shader layout location of mvp matrix
+    int                 tex1_location;
+    int                 tex2_location;
+    int                 tex3_location;
+    int                 tex4_location;
+    int                 time_location;  // time for shader animation
+} shader_resource_t;
+
+/**
+ * TODO: bind locations for standard material attribs and mvp, etc.
+ */
+
+int r_load_shader_files(GLuint *program, const char *vertex_file, const char *fragment_file);
+int r_create_shader_source(GLuint *program, const char *vertex_shader_source, const char *fragment_shader_source);
+
+void r_delete_shader(GLuint program);
 
 #endif

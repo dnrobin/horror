@@ -1,157 +1,101 @@
 #include "shared.h"
 #include "shaders.h"
 
+#include "file.h"
 #include "glad.h"
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-static GLuint vertexShader;
-static GLuint fragmentShader;
-static GLuint shaderProgram;
-
-static void _setShaderSource(const char** source, const GLenum type, int len)
+static int create_shader_with_source(GLuint *shader, GLenum type, const char** source, size_t len)
 {
-	GLuint* shader;
-
-	if(type == GL_VERTEX_SHADER)
-		shader = &vertexShader;
-	else
-		shader = &fragmentShader;
-
-	//Create a shader handle
 	*shader = glCreateShader(type);
-
-	//Send the vertex shader source code to GL
-	glShaderSource(*shader, 1, (const GLchar**)source, NULL);
-
-	//Compile the vertex shader
+	glShaderSource(*shader, 1, (const char**)source, len);
 	glCompileShader(*shader);
 
-	GLint isCompiled = 0;
-	glGetShaderiv(*shader, GL_COMPILE_STATUS, &isCompiled);
-	if(isCompiled == GL_FALSE)
+	GLint shader_compiled;
+	glGetShaderiv(*shader, GL_COMPILE_STATUS, &shader_compiled);
+	if (shader_compiled != GL_TRUE)
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &maxLength);
-	 
-		//The maxLength includes the NULL character
-		GLchar* InfoLog = (GLchar*)malloc(sizeof(GLchar)*maxLength);
-		glGetShaderInfoLog(*shader, maxLength, &maxLength, &InfoLog[0]);
-	 
-		//We don't need the shader anymore.
+		GLsizei log_length = 0;
+		GLchar info_log[1024];
+		glGetShaderInfoLog(*shader, 1024, &log_length, info_log);
+		
 		glDeleteShader(*shader);
-	 
-		printf("\n\n-- SHADER COMPILE FAILED --\n\n%s", InfoLog);
-		exit(1);
-	 
-		return;
-	}
-}
-
-void setVertexShaderSource(const char** source, int len) {
-	_setShaderSource(source, GL_VERTEX_SHADER, len);
-}
-
-void setFragmentShaderSource(const char** source, int len) {
-	_setShaderSource(source, GL_FRAGMENT_SHADER, len);
-}
-
-void unloadShaderProgram() {
-	glDeleteProgram(shaderProgram);
-	//Don't leak shaders either.
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-}
-
-void initShaderProgram() {
-	 
-	//Vertex and fragment shaders are successfully compiled.
-	//Now time to link them together into a program.
-	//Get a program object.
-	shaderProgram = glCreateProgram();
-	 
-	//Attach our shaders to our program
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	 
-	//Link our program
-	glLinkProgram(shaderProgram);
-	 
-	//Note the different functions here: glGetProgram* instead of glGetShader*.
-	GLint isLinked = 0;
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, (int *)&isLinked);
-	if(isLinked == GL_FALSE)
-	{
-		GLsizei maxLength = 0;
-		glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
-	 
-		//The maxLength includes the NULL character
-		GLchar* linkInfoLog = (GLchar*)malloc(sizeof(GLchar) * maxLength);
-		glGetProgramInfoLog(shaderProgram, maxLength+10, &maxLength, &linkInfoLog[0]);
-	 
-		//We don't need the program anymore.
-		glDeleteProgram(shaderProgram);
-		//Don't leak shaders either.
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);
-	 
-		//Use the infoLog as you see fit.
-		printf("\n\n-- SHADER PROGRAM LINKING FAILED --\n\n%s", linkInfoLog);
-		exit(1);
-	 
-		//Use the infoLog as you see fit.
-	 
-		return;
+		
+		ERROR_RET("\n\n-- %s SHADER COMPILATION ERROR --\n\n%s", 
+			type==GL_VERTEX_SHADER?"VERTEX":"FRAGMENT", info_log)
 	}
 
-	//Always detach shaders after a successful link.
-	glDetachShader(shaderProgram, vertexShader);
-	glDetachShader(shaderProgram, fragmentShader);
-
-	// Tell GL to use programmable pipeline
-	glUseProgram(shaderProgram);
+	return STATUS_SUCCESS;
 }
 
-int loadShaderSource(const char* filename, char** source, int *len)
+int r_create_shader_source(GLuint *program, const char *vertex_shader_source, const char *fragment_shader_source)
 {
-	FILE* fp;
-	size_t n;
+	GLuint vertex_shader;
 
-	// get full include path to file
-	const char filepath[256];
-	strcpy(filepath, env_base_path);
-	strcat(filepath, filename);
-
-	// open the file for reading
-	if ( !(fp = fopen(filepath, "r+")) ) {
-		printf("Error loading shader source file!\n");
-		return 0;
+	if (STATUS_FAILURE == create_shader_with_source(&vertex_shader, GL_VERTEX_SHADER, &vertex_shader_source, NULL)) {
+		return STATUS_FAILURE;
 	}
 
-	// get the file size in bytes
-	fseek(fp, 0L, SEEK_END);
-	*len = ftell(fp);
+	GLuint fragment_shader;
 
-	// allocate memory
-	*source = (char*)malloc(sizeof(char) * (*len + 2));
-	if ( *source == NULL ) {
-		printf("Error could not allocate memory for shader source!\n");
-		return 0;
+	if (STATUS_FAILURE == create_shader_with_source(&fragment_shader, GL_FRAGMENT_SHADER, &fragment_shader_source, NULL)) {
+		return STATUS_FAILURE;
 	}
 
-	// read in the content
-	fseek(fp, 0L, SEEK_SET);
-	if ( !(n = fread(*source, sizeof(char), *len, fp)) ) {
-		printf("Error could read input file!\n");
-		return 0;
+	*program = glCreateProgram();
+	glAttachShader(*program, vertex_shader);
+	glAttachShader(*program, fragment_shader);
+	
+	glLinkProgram(*program);
+	 
+	GLint program_linked;
+	glGetProgramiv(*program, GL_LINK_STATUS, &program_linked);
+	if (program_linked != GL_TRUE)
+	{
+		GLsizei log_length = 0;
+		GLchar info_log[1024];
+		glGetProgramInfoLog(*program, 1024, &log_length, info_log);
+
+		glDeleteProgram(*program);
+		glDeleteShader(vertex_shader);
+		glDeleteShader(fragment_shader);
+		
+		ERROR_RET("\n\n-- SHADER LINK ERROR --\n\n%s", info_log)
 	}
 
-	(*source)[*len] = '\0';
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
 
-	// close the file
-	fclose(fp);
+	return STATUS_SUCCESS;
+}
+
+int r_load_shader_files(GLuint *program, const char *vertex_file, const char *fragment_file)
+{
+	char *vertex_shader_source;
+	int vertex_shader_length;
+
+	char vertex_full_file[1024];
+	strcpy(vertex_full_file, env_base_path);
+	strcat(vertex_full_file, vertex_file);
+
+	f_read_text_file(vertex_full_file, &vertex_shader_source, &vertex_shader_length);
+
+	char *fragment_shader_source;
+	int fragment_shader_length;
+
+	char fragment_full_file[1024];
+	strcpy(fragment_full_file, env_base_path);
+	strcat(fragment_full_file, fragment_file);
+
+	f_read_text_file(fragment_full_file, &fragment_shader_source, &fragment_shader_length);
+
+	return r_load_shader_source(program, vertex_shader_source, fragment_shader_source);
+}
+
+void r_delete_shader(GLuint program)
+{
+	glDeleteProgram(program);
 }

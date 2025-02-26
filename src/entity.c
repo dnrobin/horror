@@ -1,6 +1,7 @@
-#include "math.h"
-
+#include "shared.h"
 #include "entity.h"
+
+#include <stdlib.h>
 
 h_entity new_entity() {
 	h_entity entity;
@@ -18,7 +19,7 @@ h_entity new_entity() {
 	entity->state = 0x0;
 	
 	// add instance to array
-	push_array(&g_entities, entity);
+	// push_array(&g_entities, entity);
 	
 	return entity;
 }
@@ -28,12 +29,12 @@ void position_entity(h_entity ent, vec3_t p) {
 }
 
 void move_entity(h_entity ent, vec3_t d) {
-	ent->position = vadd(ent->position, d);
+	ent->position = vec3_add(ent->position, d);
 }
 
 void rotate_entity(h_entity ent, vec3_t r) {
-	v_rot(&ent->direction, r.x, r.y, r.z);
-	v_rot(&ent->up, r.x, r.y, r.z);
+	vec3_rotate(&ent->direction, r.x, r.y, r.z);
+	vec3_rotate(&ent->up, r.x, r.y, r.z);
 }
 
 void point_entity(h_entity ent, vec3_t p) {

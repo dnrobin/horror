@@ -1,8 +1,8 @@
-#include <math.h>
-#include <stdlib.h>
-
+#include "shared.h"
 #include "collision.h"
-#include "common.h"
+
+
+
 /*
 bool _detectCollision( t_collision_box * b, const int colsc, const h_collision colsv ) {
 	
@@ -20,7 +20,7 @@ bool _detectCollision( t_collision_box * b, const int colsc, const h_collision c
 }
 */
 
-bool detectCollision( t_bounding_sphere* p, const int surfc, const h_collision_surface surfv ) {
+bool check_collisions( t_bounding_sphere* p, const int surfc, const h_collision_surface surfv ) {
 	
 	bool f_collision = false;
 	

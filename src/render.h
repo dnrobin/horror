@@ -1,5 +1,5 @@
-#ifndef MAZ_RENDER_H
-#define MAZ_RENDER_H
+#ifndef __MAZE_GAME_RENDER_H__
+#define __MAZE_GAME_RENDER_H__
 
 void display();
 

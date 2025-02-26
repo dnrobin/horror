@@ -1,7 +1,6 @@
-#ifndef __TRIGGER_H__
-#define __TRIGGER_H__
+#ifndef __MAZE_GAME_TRIGGER_H__
+#define __MAZE_GAME_TRIGGER_H__
 
-#include "math.h"
 #include "mem.h"
 
 typedef struct trigger {

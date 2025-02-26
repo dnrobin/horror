@@ -2,6 +2,7 @@
 #include "render.h"
 
 // OOPS..........
+#include "gamedefs.h"
 #include "game.h"
 #include "timing.h"
 #include "map.h"
@@ -10,8 +11,6 @@
 #include <math.h>
 
 #include "glad.h"
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 #include <OpenGL/glu.h>
 
@@ -39,7 +38,7 @@ void display() {
 	
 	glMatrixMode(GL_PROJECTION);									// Select The Projection Matrix	
 	glLoadIdentity();												// Reset The Projection Matrix
-	gluPerspective(70.0, 1.333, 0.1, 3.0);						// Set to perspective rendering
+	gluPerspective(g_player_fov, g_window_width/(float)g_window_height, 0.1, 100.0);						// Set to perspective rendering
 	
 	glMatrixMode(GL_MODELVIEW);	 									// To operate on the model-view matrix
 	glLoadIdentity();				  								// Reset model-view matrix
@@ -50,9 +49,9 @@ void display() {
     // printScreen(10, 10, 1.0, 1.0, 1.0, buf);
 
 	// pitch tilt..
-	glRotatef(deg(g_camera->rotation.x + g_camera->rotation_offset.x), 1.0, 0.0, 0.0);
+	glRotatef(m_deg(g_camera->rotation.x + g_camera->rotation_offset.x), 1.0, 0.0, 0.0);
 	// yaw tilt..
-	glRotatef(deg(g_camera->rotation.y + g_camera->rotation_offset.y), 0.0, 1.0, 0.0);
+	glRotatef(m_deg(g_camera->rotation.y + g_camera->rotation_offset.y), 0.0, 1.0, 0.0);
 	
 	glTranslatef(
 		-(g_camera->position.x + g_camera->position_offset.x),
@@ -74,9 +73,9 @@ void display() {
 
 	// create light source to follow player around
 	vec3_t light_offset = (vec3_t){-0.16, -0.02, -0.35};
-	v_rot(&light_offset, -0.5*g_camera->rotation.x, -g_camera->rotation.y, 0);
+	vec3_rotate(&light_offset, -0.5*g_camera->rotation.x, -g_camera->rotation.y, 0);
 		if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
-			v_rot(&light_offset,
+			vec3_rotate(&light_offset,
         		-g_camera->rotation_offset.x,
         		-g_camera->rotation_offset.y,
         		-g_camera->rotation_offset.z);
@@ -89,12 +88,11 @@ void display() {
 
 	float light_direction[] = { g_camera->look.x, g_camera->look.y, g_camera->look.z, 1.0 };
 	    if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
-        	v_rot(&light_direction,
+        	vec3_rotate(&light_direction,
         		-g_camera->rotation_offset.x,
         		-g_camera->rotation_offset.y,
         		-g_camera->rotation_offset.z);
         }
-
 
 	// flash light settings
 	glLightfv(GL_LIGHT1, GL_POSITION, light_position);
@@ -103,11 +101,11 @@ void display() {
 	
 	// candle light settings
 	glLightfv(GL_LIGHT3, GL_POSITION, light_position);
-	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.1);
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 0.5);
 	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0.005*(flare-0.5));
 	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 1.6*flare);
 
-	// RANDOM LIGHT
+	// party light settings
 	float party_light_color11[] = { 0.82, 0.0, 0.73 };
 	float party_light_color21[] = { 1.0, 0.0, 1.0 };
 	float light_position2[] = { -9.0, 0.0, -11.0 };
@@ -116,7 +114,7 @@ void display() {
 	glLightfv(GL_LIGHT7, GL_SPECULAR, party_light_color21);
 	glLightfv(GL_LIGHT7, GL_POSITION, light_position2);
 	
-	// terror/party light settings
+	// terror light settings
 	float party_direction[] = { sin(2*PI*t), -sin(2*PI*twirl1), cos(2*PI*t*flare) };
 	float party_light_color1[] = { 0.5 + twirl1 / 4.0, 0.5 + twirl3 / 4.0, 0.5 + twirl2 / 4.0, 1.0 };
 	float party_light_color2[] = { 0.5 - twirl1 / 4.0, 0.5 - twirl3 / 4.0, 0.5 - twirl2 / 4.0, 1.0 };
@@ -130,7 +128,7 @@ void display() {
 	glLightf(GL_LIGHT4, GL_SPOT_CUTOFF, 40.0 + 10.0*(0.5 + twirl1/2.0));
 	glLightf(GL_LIGHT4, GL_SPOT_EXPONENT, 0.1);
 	
-	// create light source for goal!
+	// create light source for goal
 	float light2_ambient[] = { 0.0, 0.0, 0.0, 1.0 };
 	float light2_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 	float light2_specular[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -201,7 +199,7 @@ void display() {
 	}
 	
 	// ADD CAMERA TRACKBALL FOR DEBUG
-	if ( g_state[G_DEBUG_CAMERA]) {
+	if ( g_state[G_DEBUG_CAMERA] ) {
 		glPushMatrix();
 		glLoadIdentity();
 		glRotatef(-15.0, 0.0, 1.0, 0.0);
@@ -242,47 +240,53 @@ void display() {
 	static bool just_turned_off_lights = false;
 	static float a, b, vision_adapt_amount;
     float vision_decay_amount = (g_player_stress_level/10.0)*(1.0 + 0.2*sin(2*PI*t));
-/*
+	float alpha = 0.25*(1 - exp(-(g_player_stress_level/3.0)*(g_player_stress_level/3.0)));
 
-// Noise in the vision
-    glPushMatrix();
-    glLoadIdentity();
-    	glScalef(0.138, 0.098, 1.0);
-   	 	glTranslatef(0.0, 0.0, -0.14);
-        glBindTexture(GL_TEXTURE_2D, 6);
-        glColor4f(0.5 * (1.0+vision_decay_amount), 0.2, 0.2, 0.6); //vision_decay_amount
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(-1.0, -1.0, 0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(1.0, -1.0, 0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(1.0, 1.0, 0);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(-1.0, 1.0, 0);
-        glEnd();
-    glPopMatrix();
+	// Noise in the vision
+	if (1) {
+		glPushMatrix();
+		glLoadIdentity();
+			glDisable(GL_LIGHTING);
+			glScalef(0.138, 0.098, 1.0);
+			glTranslatef(0.0, 0.0, -0.14);
+			glBindTexture(GL_TEXTURE_2D, 6);
+			glColor4f(0.5 * (1.0+vision_decay_amount), 0.2, 0.2, alpha); //vision_decay_amount
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0.0, 0.0);
+				glVertex3f(-1.0, -1.0, 0);
+				glTexCoord2f(1.0, 0.0);
+				glVertex3f(1.0, -1.0, 0);
+				glTexCoord2f(1.0, 1.0);
+				glVertex3f(1.0, 1.0, 0);
+				glTexCoord2f(0.0, 1.0);
+				glVertex3f(-1.0, 1.0, 0);
+			glEnd();
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+	}
 
     //Vision perturbations in relation to fear level
-    glPushMatrix();
-    glLoadIdentity();
-    	glScalef(0.134, 0.092, 1.0);
-   	 	glTranslatef(0.0, 0.0, -0.13);
-        glBindTexture(GL_TEXTURE_2D, 4);
-        glColor4f(0.9 * (1.0+vision_decay_amount), 0.2, 0.2, vision_decay_amount);
-        glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(-1.0, -1.0, 0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(1.0, -1.0, 0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(1.0, 1.0, 0);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(-1.0, 1.0, 0);
-        glEnd();
-    glPopMatrix();
+	if (1) {
+		glPushMatrix();
+		glLoadIdentity();
+			glScalef(0.134, 0.092, 1.0);
+			glTranslatef(0.0, 0.0, -0.13);
+			glBindTexture(GL_TEXTURE_2D, 4);
+			glColor4f(0.9 * (1.0+vision_decay_amount), 0.2, 0.2, vision_decay_amount);
+			glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0.0, 0.0);
+				glVertex3f(-1.0, -1.0, 0);
+				glTexCoord2f(1.0, 0.0);
+				glVertex3f(1.0, -1.0, 0);
+				glTexCoord2f(1.0, 1.0);
+				glVertex3f(1.0, 1.0, 0);
+				glTexCoord2f(0.0, 1.0);
+				glVertex3f(-1.0, 1.0, 0);
+			glEnd();
+		glPopMatrix();
+	}
 
     // Adaptive night vision 
     if ( !g_state[G_PLAYER_LIGHT_ON] ) {
@@ -311,45 +315,48 @@ void display() {
     }
 
     // Vision adapt
-    glPushMatrix();
-	    glLoadIdentity();
-	    glDisable(GL_LIGHTING);
-    	glScalef(0.134, 0.092, 1.0);
-   	 	glTranslatef(0.0, 0.0, -0.12);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(-1.0, -1.0, 0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(1.0, -1.0, 0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(1.0, 1.0, 0);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(-1.0, 1.0, 0);
-        glEnd();
-    	glEnable(GL_LIGHTING);
-    glPopMatrix();
+	if (1) {
+		glPushMatrix();
+			glLoadIdentity();
+			glDisable(GL_LIGHTING);
+			glScalef(0.134, 0.092, 1.0);
+			glTranslatef(0.0, 0.0, -0.12);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0.0, 0.0);
+				glVertex3f(-1.0, -1.0, 0);
+				glTexCoord2f(1.0, 0.0);
+				glVertex3f(1.0, -1.0, 0);
+				glTexCoord2f(1.0, 1.0);
+				glVertex3f(1.0, 1.0, 0);
+				glTexCoord2f(0.0, 1.0);
+				glVertex3f(-1.0, 1.0, 0);
+			glEnd();
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+	}
 
     // High contrast effect
-    glPushMatrix();
-    glLoadIdentity();
-    	glDisable(GL_LIGHTING);
-    	glScalef(0.134, 0.092, 1.0);
-   	 	glTranslatef(0.0, 0.0, -0.11);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glColor4f(0.3, 0.3, 0.3, 0.0);
-        glBlendFunc(GL_DST_COLOR, GL_DST_ALPHA);
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f(-1.0, -1.0, 0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f(1.0, -1.0, 0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f(1.0, 1.0, 0);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f(-1.0, 1.0, 0);
-        glEnd();
-        glEnable(GL_LIGHTING);
-    glPopMatrix();
-*/
+	if (1) {
+		glPushMatrix();
+		glLoadIdentity();
+			glDisable(GL_LIGHTING);
+			glScalef(0.134, 0.092, 1.0);
+			glTranslatef(0.0, 0.0, -0.11);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glColor4f(0.5, 0.5, 0.5, 0.0);
+			glBlendFunc(GL_DST_COLOR, GL_DST_ALPHA);
+			glBegin(GL_QUADS);
+				glTexCoord2f(0.0, 0.0);
+				glVertex3f(-1.0, -1.0, 0);
+				glTexCoord2f(1.0, 0.0);
+				glVertex3f(1.0, -1.0, 0);
+				glTexCoord2f(1.0, 1.0);
+				glVertex3f(1.0, 1.0, 0);
+				glTexCoord2f(0.0, 1.0);
+				glVertex3f(-1.0, 1.0, 0);
+			glEnd();
+			glEnable(GL_LIGHTING);
+		glPopMatrix();
+	}
 }

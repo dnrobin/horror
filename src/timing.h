@@ -1,5 +1,5 @@
-#ifndef MAZ_TIMING_H
-#define MAZ_TIMING_H
+#ifndef __MAZE_GAME_TIMING_H__
+#define __MAZE_GAME_TIMING_H__
 
 #include "mem.h"
 
@@ -35,10 +35,10 @@ enum {
 // hold timer values
 // struct timeval g_time_keepers[16];
 
-void addTimer(const unsigned int interval, void(*callback)());
-//void setTimer();
-//void restartTimer();
-void updateTimers();
+void add_timer(const unsigned int interval, void(*callback)());
+//void set_timer();
+//void restart_timer();
+void update_timers();
 
 float getSeconds();
 unsigned int getMillisec();

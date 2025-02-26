@@ -1,7 +1,7 @@
-#ifndef MAZ_TYPES_H
-#define MAZ_TYPES_H
+#ifndef __MAZE_GAME_TYPES_H__
+#define __MAZE_GAME_TYPES_H__
 
-// typedef enum { false = 0, true } bool;
+typedef enum { false = 0, true } bool;
 
 #include <stdint.h>
 

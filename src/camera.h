@@ -1,5 +1,5 @@
-#ifndef __CAMERA_H__
-#define __CAMERA_H__
+#ifndef __MAZE_GAME_CAMERA_H__
+#define __MAZE_GAME_CAMERA_H__
 
 /**
  * Camera holds everything to generate the view transform:

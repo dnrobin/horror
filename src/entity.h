@@ -1,7 +1,5 @@
-#ifndef __ENTITY_H__
-#define __ENTITY_H__
-
-#include "math.h"
+#ifndef __MAZE_GAME_ENTITY_H__
+#define __MAZE_GAME_ENTITY_H__
 
 /* Entity state flags */
 #define ENT_STATE_ACTIVE		0x01

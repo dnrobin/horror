@@ -1,21 +1,16 @@
-#ifndef MAZ_INPUT_H
-#define MAZ_INPUT_H
+#ifndef __MAZE_GAME_INPUT_H__
+#define __MAZE_GAME_INPUT_H__
 
 void i_handle_mouse_position_change(int x, int y);
 void i_get_mouse_coordinates(int *x, int *y);
-
-
-
-
-bool get_key(int key);
-bool get_mouse_button(int key);
 
 void i_handle_key_down(int key, int modifiers);
 void i_handle_key_up(int key, int modifiers);
 void i_handle_mouse_button_down(int button);
 void i_handle_mouse_button_up(int button);
 
-
+bool get_key(int key);
+bool get_mouse_button(int key);
 
 enum {
     KEY_UNKNOWN             = GLFW_KEY_UNKNOWN,

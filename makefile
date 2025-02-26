@@ -1,31 +1,29 @@
-SOURCES += src/mem.c
-SOURCES += src/math.c
-SOURCES += src/glad.c
-SOURCES += src/parson.c
-SOURCES += src/timing.c
-SOURCES += src/trigger.c
-SOURCES += src/bitmap.c
-SOURCES += src/shaders.c
-SOURCES += src/res.c
-SOURCES += src/map.c
-SOURCES += src/camera.c
-SOURCES += src/controls.c
-SOURCES += src/collision.c
-SOURCES += src/graphics.c
-SOURCES += src/render.c
-SOURCES += src/sound.c
-SOURCES += src/input.c
-SOURCES += src/game.c
-SOURCES += src/main.c
+TARGET = maze
 
-all:
-	cc -g -Wall -O3 $(SOURCES) -Iext/glfw/include -Lext/glfw/src -lglfw3 \
-													\
-		-framework GLUT 							\
-		-framework OpenGL 							\
-		-framework OpenAL 							\
-		-framework CoreAudio 						\
-		-framework Cocoa							\
-		-framework IOKit							\
-													\
-		-o maze
+CFLAGS =-std=c99 -Iext/glfw/include
+CFLAGS+=-W -Wall -w
+CFLAGS+=-MMD
+CFLAGS+=-O0 -g
+
+LDFLAGS=-framework OpenGL -framework OpenAL -framework IOKit -framework CoreAudio -framework Cocoa
+LDLIBS =-Lext/glfw/src -lglfw3
+
+SRCS = $(wildcard src/*.c)
+OBJS = $(SRCS:src/%.c=build/%.o)
+DEPS = $(SRCS:src/%.c=build/%.d)
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+build/%.o: src/%.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+-include $(DEPS)
+
+clean:
+	rm -f $(TARGET)
+	rm -f $(DEPS) $(OBJS)
+
+.PHONY: all clean

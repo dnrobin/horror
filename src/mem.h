@@ -1,5 +1,5 @@
-#ifndef MAZ_MEM_H
-#define MAZ_MEM_H
+#ifndef __MAZE_GAME_MEM_H__
+#define __MAZE_GAME_MEM_H__
 
 typedef struct array_item {
 	void* object;

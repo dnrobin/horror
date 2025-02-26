@@ -1,11 +1,5 @@
-#ifndef __GEOMETRY_H__
-#define __GEOMETRY_H__
-
-#include "common.h"
-#include "math.h"
-
-// REMOVE ASAP
-#include "map.h"
+#ifndef __MAZE_GAME_GEOMETRY_H__
+#define __MAZE_GAME_GEOMETRY_H__
 
 typedef struct RGBA {
 	float r;
@@ -29,7 +23,6 @@ typedef struct t_face4 {
 	vec3_t normal;
 	uint texid;
 } t_face4;
-
 
 /* structure to hold a single vertex description */
 typedef struct vertex {
@@ -66,5 +59,18 @@ typedef struct geometry {
 	struct vertex_list* vertices;
 	unsigned int nb_vertices;
 } t_geometry, *h_geometry;
+
+typedef struct {
+	t_vertex *prev;
+	t_vertex *next;
+} t_list_vertex;
+
+typedef struct {
+	t_list_vertex *head;
+	t_list_vertex *tail;
+	int nb_vertices;
+} t_vertices;
+
+
 
 #endif

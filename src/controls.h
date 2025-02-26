@@ -1,7 +1,5 @@
-#ifndef __CONTROLS_H__
-#define __CONTROLS_H__
-
-#include "common.h"
+#ifndef __MAZE_GAME_CONTROLS_H__
+#define __MAZE_GAME_CONTROLS_H__
 
 /* GLUT callbacks to handle game controls */
 void handleSpecialKeyDown(int key, int x, int y);
@@ -11,6 +9,6 @@ void handleMouseDown(int button, int state, int x, int y);
 void handleMouseMove(const int x, const int y);
 
 void c_init_controls();
-void c_update_controls(double dt);
+void c_update_controls();
 
 #endif

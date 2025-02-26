@@ -1,21 +1,17 @@
 #include "shared.h"
 #include "map.h"
 
+#include "parson.h"
 #include "res.h"
 #include "graphics.h"
 #include "math.h"
 #include "game.h"
 #include "collision.h"
 
-#include "parson.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <math.h>
-
 #include "glad.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 int loadMapJSON(const char* filename) {
 	JSON_Value* JSON;
@@ -54,6 +50,7 @@ int loadMapJSON(const char* filename) {
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	
 	for ( int f = 0; f < json_array_get_count(faces); f ++ ) {
+
 		JSON_Object* face = json_array_get_object(faces, f);
 		JSON_Array* vertices = json_object_get_array(face, "vertices");
 		JSON_Array* normal = json_object_get_array(face, "normal");
@@ -67,7 +64,7 @@ int loadMapJSON(const char* filename) {
 			json_array_get_number(normal, 0),
 			json_array_get_number(normal, 1),
 			json_array_get_number(normal, 2)
-			);
+		);
 
 		// draw face
 		if ( nverts == 4 ) {
@@ -75,28 +72,30 @@ int loadMapJSON(const char* filename) {
 		} else {
 			glBegin(GL_TRIANGLES);
 		}
-			for ( int v = 0; v < nverts; v ++ ) {
-				JSON_Object* vertex = json_array_get_object(vertices, v);
-				JSON_Array* color = json_object_get_array(vertex, "color");
-				JSON_Array* texcoords = json_object_get_array(vertex, "texcoords");
-				JSON_Array* position = json_object_get_array(vertex, "position");
-				glColor4f(
-					json_array_get_number(color, 0),
-					json_array_get_number(color, 1),
-					json_array_get_number(color, 2),
-					json_array_get_number(color, 3)
-					);
-				glTexCoord2f(
-					json_array_get_number(texcoords, 0),
-					json_array_get_number(texcoords, 1)
-					);
-				glVertex3f(
-					json_array_get_number(position,0),
-					json_array_get_number(position,1),
-					json_array_get_number(position,2)
-					);
-			}
-			glEnd();
+
+		for ( int v = 0; v < nverts; v ++ ) {
+			JSON_Object* vertex = json_array_get_object(vertices, v);
+			JSON_Array* color = json_object_get_array(vertex, "color");
+			JSON_Array* texcoords = json_object_get_array(vertex, "texcoords");
+			JSON_Array* position = json_object_get_array(vertex, "position");
+			glColor4f(
+				json_array_get_number(color, 0),
+				json_array_get_number(color, 1),
+				json_array_get_number(color, 2),
+				json_array_get_number(color, 3)
+			);
+			glTexCoord2f(
+				json_array_get_number(texcoords, 0),
+				json_array_get_number(texcoords, 1)
+			);
+			glVertex3f(
+				json_array_get_number(position,0),
+				json_array_get_number(position,1),
+				json_array_get_number(position,2)
+			);
+		}
+
+		glEnd();
 	}
 	
 	glEndList();
@@ -272,7 +271,7 @@ int loadMap(const char* filename) {
 	glNewList(GL_LIST_ID_MAP, GL_COMPILE);
 	
 	glEnable( GL_COLOR_MATERIAL );
-	//glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
+	glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
 
 	GLfloat defaultAmbient[] = {1.0, 1.0, 1.0, 1.0};
 	GLfloat defaultDiffuse[] = {1.0, 1.0, 1.0, 1.0};
@@ -285,25 +284,26 @@ int loadMap(const char* filename) {
 	glMaterialf(GL_FRONT, GL_SHININESS, defaultShininess);
 	
 	for ( i = 0; i < map.nb_faces; i ++ ) {
+
 		face = &data[i];
 		
-		/*
-		printf("\nFACE(%d) - type : %d\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",i,face->type);
-		printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0].x, face->verts[0].y, face->verts[0].z);
-		printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1].x, face->verts[1].y, face->verts[1].z);
-		printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2].x, face->verts[2].y, face->verts[2].z);
-		printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3].x, face->verts[3].y, face->verts[3].z);
-		printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0].x, face->tcoords[0].y);
-		printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1].x, face->tcoords[1].y);
-		printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2].x, face->tcoords[2].y);
-		printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3].x, face->tcoords[3].y);
-		printf("Color 1 : {%0.1f, %0.1f, %0.1f}\n",face->colors[0].r, face->colors[0].g, face->colors[0].b);
-		printf("Color 2 : {%0.1f, %0.1f, %0.1f}\n",face->colors[1].r, face->colors[1].g, face->colors[1].b);
-		printf("Color 3 : {%0.1f, %0.1f, %0.1f}\n",face->colors[2].r, face->colors[2].g, face->colors[2].b);
-		printf("Color 4 : {%0.1f, %0.1f, %0.1f}\n",face->colors[3].r, face->colors[3].g, face->colors[3].b);
-		printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal.x, face->normal.y, face->normal.z);
-		printf("TexId : %d\n",face->texid);
-		*/
+
+		// printf("\nFACE(%d) - type : %d\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",i,face->type);
+		// printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0].x, face->verts[0].y, face->verts[0].z);
+		// printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1].x, face->verts[1].y, face->verts[1].z);
+		// printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2].x, face->verts[2].y, face->verts[2].z);
+		// printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3].x, face->verts[3].y, face->verts[3].z);
+		// printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0].x, face->tcoords[0].y);
+		// printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1].x, face->tcoords[1].y);
+		// printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2].x, face->tcoords[2].y);
+		// printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3].x, face->tcoords[3].y);
+		// printf("Color 1 : {%0.1f, %0.1f, %0.1f}\n",face->colors[0].r, face->colors[0].g, face->colors[0].b);
+		// printf("Color 2 : {%0.1f, %0.1f, %0.1f}\n",face->colors[1].r, face->colors[1].g, face->colors[1].b);
+		// printf("Color 3 : {%0.1f, %0.1f, %0.1f}\n",face->colors[2].r, face->colors[2].g, face->colors[2].b);
+		// printf("Color 4 : {%0.1f, %0.1f, %0.1f}\n",face->colors[3].r, face->colors[3].g, face->colors[3].b);
+		// printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal.x, face->normal.y, face->normal.z);
+		// printf("TexId : %d\n",face->texid);
+		
 		
 		// set collision surfaces
 		g_collisions[i].v1 = (vec3_t){ face->verts[0].x, (face->normal.y==1.0?-0.35:face->verts[0].y), face->verts[0].z };
@@ -315,13 +315,30 @@ int loadMap(const char* filename) {
 		// draw vec3_sub(division surfaces for better lighting
 		glBindTexture(GL_TEXTURE_2D, g_textures[face->texid]);
 		glLineWidth(5);
+
+		if (0) {
 		
-		subdivision4(
-			convertFace4(face), 		// face pointer
-			0, 							// group u texcoord
-			0, 							// group v texcoord
-			4,							// number of divisions per axis
-			2);							// number of recursions
+			subdivision4(
+				convertFace4(face), 		// face pointer
+				0, 							// group u texcoord
+				0, 							// group v texcoord
+				4,							// number of divisions per axis
+				2);							// number of recursions
+		}
+
+		else {
+
+
+			glNormal3f(face->normal.x, face->normal.y, face->normal.z);
+			glBegin(GL_QUADS);
+			
+			for (int j = 0; j < 4; ++j) {
+				glTexCoord2f(face->tcoords[j].x, face->tcoords[j].y);
+				glColor4f(face->colors[j].r,face->colors[j].r,face->colors[j].r, 1.0);
+				glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j].z);
+			}
+
+			glEnd();
 
 			// glColor3f(1.0, 1.0, 1.0);
 			// glBegin(GL_LINES);
@@ -330,6 +347,7 @@ int loadMap(const char* filename) {
 			// 	glVertex3f(face->verts[j].x + 0.2*face->normal.x, face->verts[j].y + 0.2*face->normal.y, face->verts[j].z + 0.2*face->normal.z);
 			// }
 			// glEnd();
+		}
 	}
 	
 	glEndList();
@@ -356,7 +374,7 @@ void subdivision4(const t_face4* face, const int _u, const int _v, const int ndi
 	};
 	
 	// create new faces
-	int ru = _u*(int)pow(2, (rec+1))/ndivs, rv = _v*(int)pow(2, (rec+1))/ndivs;
+	int ru = _u*(int)m_pow(2, (rec+1))/ndivs, rv = _v*(int)m_pow(2, (rec+1))/ndivs;
 	t_face4 faces[4];
 	faces[0] = *face;
 	faces[0].vertices[0] = v1;

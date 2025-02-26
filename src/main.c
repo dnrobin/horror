@@ -73,13 +73,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (action == GLFW_PRESS) {
 		i_handle_key_down(key, mods);
-		/* TO BE REMOVED */
-		handleKeyDown(key, 0, 0);
 	}
 	else {
 		i_handle_key_up(key, mods);
-		/* TO BE REMOVED */
-		handleKeyUp(key, 0, 0);
 	}
 }
 
@@ -97,8 +93,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (action == GLFW_PRESS) {
 		i_handle_mouse_button_down(button);
-		/* TO BE REMOVED */
-		handleMouseDown(button,action,0,0);
 	}
 	else {
 		i_handle_mouse_button_up(button);
