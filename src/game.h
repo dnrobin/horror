@@ -12,7 +12,7 @@ void shutdown();
 
 t_physics_particle g_camera_physics_model;
 t_bounding_sphere g_camera_collision_model;
-t_sound_emitter* g_camera_sound_emitter_model;
+sound_emitter_t* g_camera_sound_emitter_model;
 h_collision_surface g_collisions;
 int g_collisions_count;
 

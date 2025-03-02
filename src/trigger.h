@@ -11,11 +11,11 @@ typedef struct trigger {
 	float retrigger_start_time;
 	float retrigger_ellapsed;
 	char triggered;
-} t_trigger, *h_trigger;
+} t_trigger;
 
 h_array g_triggers;
 
-void addTrigger(const vec3_t position, const void(*action)(), const char retrigger, const float retrigger_interval);
-void fireTrigger(h_trigger trig);
+void addTrigger(const vec3_t position, void(*action)(), const char retrigger, const float retrigger_interval);
+void fireTrigger(t_trigger *trig);
 
 #endif

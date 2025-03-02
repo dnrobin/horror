@@ -1,67 +1,66 @@
 #include "shared.h"
-
 #include "res.h"
+
+#include "texture.h"
+#include "sound.h"
 #include "game.h"
-#include "gamedefs.h"
-#include "trigger.h"
-#include "timing.h"
-#include "graphics.h"
 
 #include "glad.h"
 
-resource_descriptor_t resource_descriptors[] = {
-	{ 987, RESOURCE_TYPE_IMAGE, "res/textures/walltex_06_diffuse.bmp" },
-	{ 989, RESOURCE_TYPE_IMAGE, "res/textures/walltex_06_diffuse2.bmp" },
-	{ 988, RESOURCE_TYPE_IMAGE, "res/textures/floortex_5.bmp" },
-	{ 990, RESOURCE_TYPE_SOUND, "res/sounds/background_6.wav"},
-	{ 991, RESOURCE_TYPE_SOUND, "res/sounds/background_3.wav"},
-	{ 992, RESOURCE_TYPE_SOUND, "res/sounds/music_1.wav"},
-	{ 993, RESOURCE_TYPE_SOUND, "res/sounds/walk_4.wav"},
-	{ 994, RESOURCE_TYPE_SOUND, "res/sounds/heart_1.wav"},
-	{ 995, RESOURCE_TYPE_SOUND, "res/sounds/heart_2.wav"},
-	{ 996, RESOURCE_TYPE_SOUND, "res/sounds/heart_3.wav"},
-	{ 997, RESOURCE_TYPE_SOUND, "res/sounds/breathe_1.wav"},
-	{ 998, RESOURCE_TYPE_SOUND, "res/sounds/breathe_2.wav"},
-	{ 999, RESOURCE_TYPE_SOUND, "res/sounds/breathe_3.wav"},
-	{ 1000, RESOURCE_TYPE_SOUND, "res/sounds/breathe_4.wav"},
-	{ 1001, RESOURCE_TYPE_SOUND, "res/sounds/moan_1.wav"},
-	{ 1002, RESOURCE_TYPE_SOUND, "res/sounds/footsteps_1.wav"},
-	{ 1003, RESOURCE_TYPE_SOUND, "res/sounds/grunt_behind_1.wav"},
-	{ 1004, RESOURCE_TYPE_SOUND, "res/sounds/whisper_1.wav"},
-	{ 1005, RESOURCE_TYPE_SOUND, "res/sounds/fx_7.wav"},
-	{ 1006, RESOURCE_TYPE_SOUND, "res/sounds/fx_8.wav"},
-	{ 1007, RESOURCE_TYPE_SOUND, "res/sounds/dark_sound_1.wav"},
-	{ 1008, RESOURCE_TYPE_SOUND, "res/sounds/fx_beat_1.wav"},
-	{ 1009, RESOURCE_TYPE_SOUND, "res/sounds/intro_naration.wav"},
-	{ 1010, RESOURCE_TYPE_SOUND, "res/sounds/background_2.wav"},
-	{ 1011, RESOURCE_TYPE_IMAGE, "res/textures/vision_1.bmp"},
-    { 1012, RESOURCE_TYPE_SOUND, "res/sounds/grunt_far_1.wav"},
-    { 1013, RESOURCE_TYPE_SOUND, "res/sounds/grunt_close_1.wav"},
-    { 1014, RESOURCE_TYPE_IMAGE, "res/textures/mask2.bmp"},
-    { 1015, RESOURCE_TYPE_IMAGE, "res/textures/noise_1.bmp"},
-    { 1016, RESOURCE_TYPE_SOUND, "res/sounds/flash_light_1.wav"},
-    { 1017, RESOURCE_TYPE_SOUND, "res/sounds/background_7.wav"},
-    { 1018, RESOURCE_TYPE_IMAGE, "res/textures/fog.bmp"}
+map_asset_descriptor_t map_assets[] = {
+	{ 987, 	ASSET_IMAGE, "res/textures/walltex_06_diffuse.bmp" },
+	{ 989, 	ASSET_IMAGE, "res/textures/walltex_06_diffuse2.bmp" },
+	{ 988, 	ASSET_IMAGE, "res/textures/floortex_5.bmp" },
+	{ 990, 	ASSET_SOUND, "res/sounds/background_6.wav" },
+	{ 991, 	ASSET_SOUND, "res/sounds/background_3.wav" },
+	{ 992, 	ASSET_SOUND, "res/sounds/music_1.wav" },
+	{ 993, 	ASSET_SOUND, "res/sounds/walk_4.wav" },
+	{ 994, 	ASSET_SOUND, "res/sounds/heart_1.wav" },
+	{ 995, 	ASSET_SOUND, "res/sounds/heart_2.wav" },
+	{ 996, 	ASSET_SOUND, "res/sounds/heart_3.wav" },
+	{ 997, 	ASSET_SOUND, "res/sounds/breathe_1.wav" },
+	{ 998, 	ASSET_SOUND, "res/sounds/breathe_2.wav" },
+	{ 999, 	ASSET_SOUND, "res/sounds/breathe_3.wav" },
+	{ 1000, ASSET_SOUND, "res/sounds/breathe_4.wav" },
+	{ 1001, ASSET_SOUND, "res/sounds/moan_1.wav" },
+	{ 1002, ASSET_SOUND, "res/sounds/footsteps_1.wav" },
+	{ 1003, ASSET_SOUND, "res/sounds/grunt_behind_1.wav" },
+	{ 1004, ASSET_SOUND, "res/sounds/whisper_1.wav" },
+	{ 1005, ASSET_SOUND, "res/sounds/fx_7.wav" },
+	{ 1006, ASSET_SOUND, "res/sounds/fx_8.wav" },
+	{ 1007, ASSET_SOUND, "res/sounds/dark_sound_1.wav" },
+	{ 1008, ASSET_SOUND, "res/sounds/fx_beat_1.wav" },
+	{ 1009, ASSET_SOUND, "res/sounds/intro_naration.wav" },
+	{ 1010, ASSET_SOUND, "res/sounds/background_2.wav" },
+	{ 1011, ASSET_IMAGE, "res/textures/vision_1.bmp" },
+    { 1012, ASSET_SOUND, "res/sounds/grunt_far_1.wav" },
+    { 1013, ASSET_SOUND, "res/sounds/grunt_close_1.wav" },
+    { 1014, ASSET_IMAGE, "res/textures/mask2.bmp" },
+    { 1015, ASSET_IMAGE, "res/textures/noise_1.bmp" },
+    { 1016, ASSET_SOUND, "res/sounds/flash_light_1.wav" },
+    { 1017, ASSET_SOUND, "res/sounds/background_7.wav" },
+    { 1018, ASSET_IMAGE, "res/textures/fog.bmp" }
 };
-const int resource_descriptors_count = sizeof(resource_descriptors) / sizeof(resource_descriptor_t);
+const int map_assets_count = sizeof(map_assets) / sizeof(map_asset_descriptor_t);
 
-texture_resource_descriptor_t texture_resource_descriptors[] = {
-	{ 987,  0, 803, 786, 4, GL_BGRA, GL_UNSIGNED_BYTE, GL_LINEAR },
-	{ 988,  0, 720, 464, 4, GL_BGRA, GL_UNSIGNED_BYTE, GL_LINEAR },
-	{ 989,  0, 803, 786, 4, GL_BGRA, GL_UNSIGNED_BYTE, GL_LINEAR },
-	{ 1011, 0, 867, 650, 4, GL_BGRA, GL_UNSIGNED_BYTE, GL_LINEAR },
-    { 1014, 0, 867, 650, 4, GL_BGRA, GL_UNSIGNED_BYTE, GL_LINEAR },
-    { 1015, 0, 867, 650, 3, GL_RGB,  GL_UNSIGNED_BYTE, GL_LINEAR },
-    { 1018, 0, 0, 0, 4, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR },
+map_shader_descriptor_t map_shaders[] = {
+	// TODO: add shader parameters here like locations, attribs, etc...
+	{ 100, "res/shaders/default.vert", "res/shaders/default.frag" }
 };
-const int texture_resource_descriptors_count = sizeof(texture_resource_descriptors) / sizeof(texture_resource_descriptor_t);
+const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor_t);
 
-shader_descriptor_t shader_descriptors[] = {
-	{ 100, 0, "res/shaders/default.vert", "res/shaders/default.frag"}
+texture_t map_textures[] = {
+	{ .asset_id = 987 },
+	{ .asset_id = 988 },
+	{ .asset_id = 989 },
+	{ .asset_id = 1011 },
+    { .asset_id = 1014 },
+    { .asset_id = 1015 },
+    { .asset_id = 1018 },
 };
-const int shader_descriptors_count = sizeof(shader_descriptors) / sizeof(shader_descriptor_t);
+const int map_textures_count = sizeof(map_textures) / sizeof(texture_t);
 
-t_sound_resource_descriptor sound_descriptors[] = {
+sound_resource_descriptor_t map_sound_emitters[] = {
 	{ 990, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.12, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 991, SOUND_EMIT_LOOPED, {1.0, 2.0, -14.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.35, 1.0, 56.0, 5.0, 7.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 992, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.4, 1.0, 30.0, 0.1, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 0 },
@@ -88,7 +87,7 @@ t_sound_resource_descriptor sound_descriptors[] = {
     { 1016, 0, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, 0.05, 1.0, 1.0, 0, 0, 1, 1, 0, 0, 1, 0, 0 },
     { 1017, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.1, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 };
-const int sound_descriptors_count = sizeof(sound_descriptors) / sizeof(t_sound_resource_descriptor);
+const int map_sound_emitters_count = sizeof(map_sound_emitters) / sizeof(sound_resource_descriptor_t);
 
 // ********************************************************************
 // END MAP RESOURCE DEFINITIONS

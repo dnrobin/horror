@@ -17,17 +17,21 @@
 #define SOUND_EMIT_UNASSIGNED2	0x40
 #define SOUND_EMIT_UNASSIGNED3	0x80
 
-typedef struct audio_buffer_descriptor {
+typedef struct {
 	ALenum     format;
 	ALsizei    size;
 	ALsizei    freq;
 	ALboolean  loop;
 	ALvoid*    data;
 	unsigned int buffer_id;
-} t_audio_buffer_descriptor, *h_audio_buffer_descriptor;
+} audio_buffer_t;
+
+int f_load_sound_file(const char* filename, audio_buffer_t *buf);
 
 typedef struct sound_resource_descriptor {
-	uint id;
+	// TODO: decouple this. Asset should contain reference to this object.
+    int                 asset_id;
+
 	unsigned char options;		// option bits
 	float position[3];			// position in world
 	float velocity[3];			// velocity if moving to calculate dopler shift
@@ -44,7 +48,7 @@ typedef struct sound_resource_descriptor {
 	float cone_gain_factor;		// gain multiplier for cone calculations
 	unsigned int buffer_id;		// sound buffer id
 	unsigned int source_id;		// emitter id (sound source id)
-} t_sound_resource_descriptor, *h_sound_resource_descriptor;
+} sound_resource_descriptor_t;
 
 typedef struct sound_emitter {
 	unsigned char options;		// option bits
@@ -63,17 +67,24 @@ typedef struct sound_emitter {
 	float cone_gain_factor;		// gain multiplier for cone calculations
 	unsigned int buffer_id;		// sound buffer id
 	unsigned int source_id;		// emitter id (sound source id)
-} t_sound_emitter, *h_sound_emitter;
+} sound_emitter_t;
 
-int initAL();
-int shutdownAL();
-h_audio_buffer_descriptor loadSoundFromFile(const char* filename);
-h_sound_emitter get_new_sound_emitter(const int sound_buffer_id);
-int add_sound_emitter_to_scene(h_sound_emitter emitter);
+
+sound_emitter_t *get_new_sound_emitter(const int sound_buffer_id);
+
+int add_sound_emitter_to_scene(sound_emitter_t *emitter);
 void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up);
-void load_sound_emitters(const int soundc, t_sound_resource_descriptor* soundv);
+
+void load_sound_emitters(const int soundc, sound_resource_descriptor_t* soundv);
+
+int s_create_sound_emitter(sound_resource_descriptor_t *sound);
+
 void soundSetState(const int source_id, const int state_id);
+
 void playSound(const int source_id);
 void stopSound(const int source_id);
+
+int init_al();
+int shutdown_al();
 
 #endif

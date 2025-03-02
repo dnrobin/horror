@@ -1,13 +1,14 @@
 #include "shared.h"
 #include "map.h"
 
-#include "parson.h"
+
+#include "game.h"
 #include "res.h"
 #include "graphics.h"
-#include "math.h"
-#include "game.h"
 #include "collision.h"
+#include "texture.h"
 
+#include "parson.h"
 #include "glad.h"
 
 #include <string.h>
@@ -209,8 +210,8 @@ int saveMap(const int mapc, const float* mapv, const char* filename ) {
 	return 1;
 }
 
-int loadMap(const char* filename) {
-	
+int loadMap(const char* filename)
+{	
 	FILE* fp;
 	char filepath[256];
 	t_map_descriptor map;
@@ -266,7 +267,6 @@ int loadMap(const char* filename) {
 	#endif
 	
 	t__face* face;
-	h_texture_resource_descriptor tex;
 	
 	glNewList(GL_LIST_ID_MAP, GL_COMPILE);
 	
@@ -313,7 +313,8 @@ int loadMap(const char* filename) {
 		g_collisions[i].normal = (vec3_t){ face->normal.x, face->normal.y, face->normal.z };
 		
 		// draw vec3_sub(division surfaces for better lighting
-		glBindTexture(GL_TEXTURE_2D, g_textures[face->texid]);
+
+		glBindTexture(GL_TEXTURE_2D, face->texid);
 		glLineWidth(5);
 
 		if (0) {

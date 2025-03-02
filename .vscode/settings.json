@@ -4,7 +4,7 @@
         "sound.h": "c",
         "game.h": "c",
         "graphics.h": "c",
-        "shaders.h": "c",
+        "shader.h": "c",
         "mem.h": "c",
         "shared.h": "c",
         "timing.h": "c",
@@ -44,6 +44,7 @@
         "cstdlib": "c",
         "texture.h": "c",
         "array": "c",
-        "bitmap.h": "c"
+        "bitmap.h": "c",
+        "unordered_map": "c"
     }
 }

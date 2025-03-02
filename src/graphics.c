@@ -3,6 +3,8 @@
 
 #include "glad.h"
 
+#include <string.h>
+
 void checkGLError()
 {
 	GLenum e = glGetError();

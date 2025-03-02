@@ -2,10 +2,11 @@
 #define __MAZE_GAME_RES_H__
 
 typedef enum {
-	ASSET_MODEL,
-	ASSET_IMAGE,
-	ASSET_SOUND,
+	ASSET_MODEL,		// 3d model file to be loaded as a render model_t
+	ASSET_IMAGE,		// texture image file to be loaded as texture_t
+	ASSET_SOUND,		// texture image file to be loaded as audio_buffer_t
 	ASSET_MUSIC,
+	ASSET_SHADER,
 	
 	MAX_ASSET_TYPE
 } asset_type_t;
@@ -18,30 +19,39 @@ typedef struct {
 } map_asset_descriptor_t;
 
 int f_load_map_asset_file(const map_asset_descriptor_t *desc);
-// note: once an asset has been loaded it is automatically discarted
 
 typedef struct {
 	int 					asset_id;		// globally unique identifier
 	const char 				*vertex_filename;
 	const char 				*fragment_filename;
-} shader_asset_descriptor_t;
+} map_shader_descriptor_t;
 
-int f_load_shader_asset_files(const shader_asset_descriptor_t *desc);
+int f_load_map_shader_file(const map_shader_descriptor_t *desc);
 
 /* represents assets which are loaded and converted to subsystem objects */
-typedef struct{
-	asset_type_t 			type;			// asset class type
+typedef struct map_asset_s {
+
 	int 					asset_id;		// globally unique idendifier
+
+	asset_type_t 			type;			// asset class type
 	
 	void 					*pdata;			// generic pointer to asset data
 
 	// note: subsystems are responsible for setting this
 	// pointer when creating the asset and only they know
 	// how to dereference this pointer to a meaningful type.
+
+	struct map_asset_s 		*next;
+	struct map_asset_s 		*prev;
 } map_asset_t;
 
 map_asset_t *get_asset(int id);
 // map_asset_t *get_asset(const char *name);
+
+
+
+
+
 
 
 
@@ -73,28 +83,26 @@ map_asset_t *get_asset(int id);
 
 
 
+// typedef struct res_s {
+// 	struct res_s* prev_resource;		// pointer to the previous resource in the list
+// 	struct res_s* next_resource;		// pointer to the next resource in the list
+// 	unsigned int id;					// id of the resource
+// 	unsigned int type;					// resource type
+// 	void* resource;						// pointer to the resource itself
+// } res_t;
 
+// #define RESOURCE_TYPE_IMAGE 	1
+// #define RESOURCE_TYPE_TEXTURE	2
+// #define RESOURCE_TYPE_SOUND		3
 
-typedef struct res_s {
-	struct res_s* prev_resource;		// pointer to the previous resource in the list
-	struct res_s* next_resource;		// pointer to the next resource in the list
-	unsigned int id;					// id of the resource
-	unsigned int type;					// resource type
-	void* resource;						// pointer to the resource itself
-} res_t;
+// // resources linked-list
+// // SHOULD BE PRIVATE...
+// res_t* r_first_resource;
+// res_t* r_last_resource;
+// int r_resource_count;
 
-#define RESOURCE_TYPE_IMAGE 	1
-#define RESOURCE_TYPE_TEXTURE	2
-#define RESOURCE_TYPE_SOUND		3
-
-// resources linked-list
-// SHOULD BE PRIVATE...
-res_t* r_first_resource;
-res_t* r_last_resource;
-int r_resource_count;
-
-int loadResourceFromFile(const resource_descriptor_t* res);
-int loadResource(const uint id, const uint type, void* res);
-void* getResource(const int id);
+// int loadResourceFromFile(const resource_descriptor_t* res);
+// int loadResource(const uint id, const uint type, void* res);
+// void* getResource(const int id);
 
 #endif

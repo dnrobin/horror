@@ -3,7 +3,7 @@
 #include "graphics.h"
 #include "sound.h"
 #include "input.h"
-#include "shaders.h"
+#include "shader.h"
 
 #include "controls.h"
 #include "timing.h"
@@ -158,11 +158,11 @@ int main(int argc, char* argv[])
 	
 	debug_print(KMAG "\n== Initializing graphics ==\n" KNRM);
 	
-	initGL();									// initialize OpenGl state
+	init_gl();									// initialize OpenGl state
 	
 	debug_print(KMAG "\n== Initializing sound ==\n" KNRM);
 	
-	initAL();									// initialize AL state
+	init_al();									// initialize AL state
 	
 	init();		// init game environment
 	
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 
 	shutdown();
 
-	shutdownAL();
+	shutdown_al();
 
     glfwDestroyWindow(win);
     glfwTerminate();

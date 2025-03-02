@@ -20,8 +20,8 @@ ALuint a_sound_sources[MAX_SOUND_SOURCES] = {0};
 int a_sound_buffers_set_count = 0;
 int a_sound_sources_set_count = 0;
 
-int initAL() {
-	
+int init_al()
+{	
 	int error;
 	// clear errors
 	alGetError();
@@ -74,8 +74,8 @@ int initAL() {
 	return 1;
 }
 
-int shutdownAL() {
-	
+int shutdown_al()
+{	
 	int error;
 	// clear errors
 	alGetError();
@@ -115,67 +115,65 @@ int shutdownAL() {
 
 //==============================================================================================================
 
-h_audio_buffer_descriptor loadSoundFromFile(const char* filename) {
-	
-	h_audio_buffer_descriptor sound;
-	
+int f_load_sound_file(const char* filename, audio_buffer_t *buf)
+{
 	int error;
 	// clear errors
 	alGetError();
 	
-	if( (sound = (h_audio_buffer_descriptor)malloc(sizeof(t_audio_buffer_descriptor))) == NULL ) {
+	if( (buf = (audio_buffer_t*)malloc(sizeof(audio_buffer_t))) == NULL ) {
 		printf("Error: could not allocate sound descriptor!\n");
-		return NULL;
+		return STATUS_FAILURE;
 	}
 
 	// load wav file data 
-	alutLoadWAVFile((ALbyte*)filename, &sound->format, &sound->data, &sound->size, &sound->freq);
+	alutLoadWAVFile((ALbyte*)filename, &buf->format, &buf->data, &buf->size, &buf->freq);
 	
 	// check errors
 	if ((error = alGetError()) != AL_NO_ERROR)
 	{
 	  printf("Error (%d - %s): could not load sound file %s\n", error, alGetString(error), filename);
-	  shutdownAL();
-	  return NULL;
+	  shutdown_al();
+	  return STATUS_FAILURE;
 	}
 	
 	// keep buffer source_id for sound
-	sound->buffer_id = a_sound_buffers_set_count;
+	buf->buffer_id = a_sound_buffers_set_count;
 	
 	// increment set buffer number
 	a_sound_buffers_set_count++;
 	
 	// load buffer data
-	alBufferData(a_sound_buffers[sound->buffer_id], sound->format, sound->data, sound->size, sound->freq);
+	alBufferData(a_sound_buffers[buf->buffer_id], buf->format, buf->data, buf->size, buf->freq);
 	
 	// check errors
 	if ((error = alGetError()) != AL_NO_ERROR)
 	{
 	  printf("Error (%d - %s): could not set sound buffer data\n", error, alGetString(error));
-	  shutdownAL();
-	  return 0;
+	  shutdown_al();
+	  return STATUS_FAILURE;
 	}
 	
 	// unload wav data
-	alutUnloadWAV(sound->format, sound->data, sound->size, sound->freq);
+	alutUnloadWAV(buf->format, buf->data, buf->size, buf->freq);
 	
 	// check errors
 	if ((error = alGetError()) != AL_NO_ERROR)
 	{
 	  printf("Error (%d - %s): could not unload sound data\n", error, alGetString(error));
-	  shutdownAL();
-	  return 0;
+	  shutdown_al();
+	  return STATUS_FAILURE;
 	}
 	
-	return sound;
+	return STATUS_SUCCESS;
 }
 
-h_sound_emitter get_new_sound_emitter(const int sound_buffer_id) {
-	
-	h_sound_emitter emitter;
+sound_emitter_t *get_new_sound_emitter(const int sound_buffer_id)
+{	
+	sound_emitter_t *emitter;
 	
 	// create new emitter instance
-	if( (emitter = (h_sound_emitter)malloc(sizeof(t_sound_emitter))) == NULL ) {
+	if( (emitter = (sound_emitter_t*)malloc(sizeof(sound_emitter_t))) == NULL ) {
 		printf("Error: could not create sound emitter\n");
 		return NULL;
 	}
@@ -204,8 +202,8 @@ h_sound_emitter get_new_sound_emitter(const int sound_buffer_id) {
 	return emitter;
 }
 
-int add_sound_emitter_to_scene(h_sound_emitter emitter) {
-	
+int add_sound_emitter_to_scene(sound_emitter_t* emitter)
+{	
 	int error;
 	// clear errors
 	alGetError();
@@ -268,8 +266,8 @@ int add_sound_emitter_to_scene(h_sound_emitter emitter) {
 	return 1;
 }
 
-void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up) {
-	
+void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up)
+{	
 	// orientation parameters
 	ALfloat orientation[] = { direction->x, direction->y, direction->z, up->x, up->y, up->z };
 	
@@ -280,47 +278,80 @@ void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up) {
 	alListenerfv(AL_ORIENTATION, orientation);
 }
 
-void load_sound_emitters(const int soundc, t_sound_resource_descriptor* soundv) {
-
-	int i;
-	h_audio_buffer_descriptor res;
-	h_sound_emitter emitter;
+// void load_sound_emitters(const int soundc, sound_resource_descriptor_t *soundv)
+// {
+// 	int i;
+// 	audio_buffer_t *res;
+// 	sound_emitter_t* emitter;
 	
-	for ( i = 0; i < soundc; i ++ ) {
-		res = getResource(soundv[i].id);
+// 	for ( i = 0; i < soundc; i ++ )
+// 	{
+// 		res = get_asset(soundv[i].asset_id);
 		
-		emitter = get_new_sound_emitter( res->buffer_id );
+// 		emitter = get_new_sound_emitter( res->buffer_id );
 
-		// set emitter
-		emitter->options = soundv[i].options;
-		emitter->position = vec3(soundv[i].position[0],soundv[i].position[1],soundv[i].position[2]);
-		emitter->velocity = vec3(soundv[i].velocity[0],soundv[i].velocity[1],soundv[i].velocity[2]);
-		emitter->direction = vec3(soundv[i].direction[0],soundv[i].direction[1],soundv[i].direction[2]);
-		emitter->gain = soundv[i].gain;
-		emitter->gain_rolloff = soundv[i].gain_rolloff;
-		emitter->min_distance = soundv[i].min_distance;
-		emitter->max_distance = soundv[i].max_distance;
-		emitter->min_gain = soundv[i].min_gain;
-		emitter->max_gain = soundv[i].max_gain;
-		emitter->pitch = soundv[i].pitch;
-		emitter->cone_inner_angle = soundv[i].cone_inner_angle;
-		emitter->cone_outer_angle = soundv[i].cone_outer_angle;
-		emitter->cone_gain_factor = soundv[i].cone_gain_factor;
+// 		// set emitter
+// 		emitter->options = soundv[i].options;
+// 		emitter->position = vec3(soundv[i].position[0],soundv[i].position[1],soundv[i].position[2]);
+// 		emitter->velocity = vec3(soundv[i].velocity[0],soundv[i].velocity[1],soundv[i].velocity[2]);
+// 		emitter->direction = vec3(soundv[i].direction[0],soundv[i].direction[1],soundv[i].direction[2]);
+// 		emitter->gain = soundv[i].gain;
+// 		emitter->gain_rolloff = soundv[i].gain_rolloff;
+// 		emitter->min_distance = soundv[i].min_distance;
+// 		emitter->max_distance = soundv[i].max_distance;
+// 		emitter->min_gain = soundv[i].min_gain;
+// 		emitter->max_gain = soundv[i].max_gain;
+// 		emitter->pitch = soundv[i].pitch;
+// 		emitter->cone_inner_angle = soundv[i].cone_inner_angle;
+// 		emitter->cone_outer_angle = soundv[i].cone_outer_angle;
+// 		emitter->cone_gain_factor = soundv[i].cone_gain_factor;
 		
-		add_sound_emitter_to_scene(emitter);
+// 		add_sound_emitter_to_scene(emitter);
 		
-		// store ids in resource
-		soundv[i].source_id = emitter->source_id;
+// 		// store ids in resource
+// 		soundv[i].source_id = emitter->source_id;
 		
-		if ( emitter->options & SOUND_EMIT_AUTOPLAY )
-			alSourcePlay(a_sound_sources[emitter->source_id]);
+// 		if ( emitter->options & SOUND_EMIT_AUTOPLAY )
+// 			alSourcePlay(a_sound_sources[emitter->source_id]);
+// 	}
+	
+// 	// ERROR INCOMPLETE CODE EMITTER INFO IS LOST HERE MUST STORE IN RESMAN!!!!!!
+// }
+
+int s_create_sound_emitter(sound_resource_descriptor_t *sound)
+{
+	map_asset_t *asset = get_asset(sound->asset_id);
+	audio_buffer_t *buf = (audio_buffer_t*)asset->pdata;
+	sound_emitter_t* emitter = get_new_sound_emitter( buf->buffer_id );
+
+	// set emitter
+	emitter->options = sound->options;
+	emitter->position = vec3(sound->position[0],sound->position[1],sound->position[2]);
+	emitter->velocity = vec3(sound->velocity[0],sound->velocity[1],sound->velocity[2]);
+	emitter->direction = vec3(sound->direction[0],sound->direction[1],sound->direction[2]);
+	emitter->gain = sound->gain;
+	emitter->gain_rolloff = sound->gain_rolloff;
+	emitter->min_distance = sound->min_distance;
+	emitter->max_distance = sound->max_distance;
+	emitter->min_gain = sound->min_gain;
+	emitter->max_gain = sound->max_gain;
+	emitter->pitch = sound->pitch;
+	emitter->cone_inner_angle = sound->cone_inner_angle;
+	emitter->cone_outer_angle = sound->cone_outer_angle;
+	emitter->cone_gain_factor = sound->cone_gain_factor;
+	
+	add_sound_emitter_to_scene(emitter);
+	
+	// store ids in resource
+	sound->source_id = emitter->source_id;
+	
+	if ( emitter->options & SOUND_EMIT_AUTOPLAY ) {
+		alSourcePlay(a_sound_sources[emitter->source_id]);
 	}
-	
-	// ERROR INCOMPLETE CODE EMITTER INFO IS LOST HERE MUST STORE IN RESMAN!!!!!!
 }
 
-void soundSetState(const int source_id, const int state_id) {
-	
+void soundSetState(const int source_id, const int state_id)
+{	
 	int error; alGetError();
 	ALuint al_state;
 	alGetSourcei(a_sound_sources[source_id], AL_SOURCE_STATE, &al_state);
@@ -347,8 +378,8 @@ void soundSetState(const int source_id, const int state_id) {
 
 //==============================================================================================================
 
-void playSound(const int source_id) {
-	
+void playSound(const int source_id)
+{	
 	int error; alGetError();
 	
 	alSourcePlay(a_sound_sources[source_id]);
@@ -361,8 +392,8 @@ void playSound(const int source_id) {
 	}
 }
 
-void stopSound(const int source_id) {
-	
+void stopSound(const int source_id)
+{	
 	int error; alGetError();
 	
 	alSourceStop(a_sound_sources[source_id]);

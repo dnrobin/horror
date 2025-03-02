@@ -71,7 +71,7 @@ int f_load_bitmap_file(const char* filename, bitmap_t *image)
 	fseek(fp, 12, SEEK_CUR);
 
 	// read data
-	image->buffer = (unsigned char *)malloc(sizeof(unsigned char)*size);
+	image->buffer = (unsigned char *)malloc(size);
 	if( image->buffer == NULL ) {
 		printf("Error allocation memory for texture images\n");
 		return 0;
@@ -100,4 +100,10 @@ int f_load_bitmap_file(const char* filename, bitmap_t *image)
 	fclose(fp);
 
 	return STATUS_SUCCESS;
+}
+
+void f_free_bitmap(bitmap_t *image)
+{
+	free(image->buffer);
+	image->buffer = NULL;
 }

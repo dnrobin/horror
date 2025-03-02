@@ -19,8 +19,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-int g_textures[1024];
-
 // print debug info to console
 #define __DEBUG 1
 #define GL_DEBUG_WITH_MIN false

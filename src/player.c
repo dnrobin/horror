@@ -10,7 +10,7 @@ void update_stress_response() {
 	
 	float dt = getEllapsedSeconds(TIMER4);
 
-	static lights_were_off = false;
+	static bool lights_were_off = false;
 
 	if ( !g_state[G_PLAYER_LIGHT_ON] ) {
 		if ( !lights_were_off ) {

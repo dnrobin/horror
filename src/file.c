@@ -1,9 +1,10 @@
+#include "shared.h"
 #include "file.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-int f_read_text_file(const char *filename, char **data, size_t *len)
+int f_read_text_file(const char *filename, char *data, size_t *len)
 {
 	FILE *fp = fopen(filename, "r");
 
@@ -24,7 +25,7 @@ int f_read_text_file(const char *filename, char **data, size_t *len)
         FATAL_RET("Failed to read text file '%s'!\n", filename);
     }
     
-    *data = p;
+    data = p;
     *len = n;
 
     fclose(fp);

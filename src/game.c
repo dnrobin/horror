@@ -3,11 +3,13 @@
 
 #include "gamedefs.h"
 #include "timing.h"
+#include "trigger.h"
 #include "controls.h"
 #include "player.h"
 #include "graphics.h"
+#include "sound.h"
 #include "render.h"
-#include "shaders.h"
+#include "shader.h"
 #include "map.h"
 
 // private game state
@@ -22,49 +24,59 @@ camera_t *g_camera = &game_camera;
 
 static void unload_map()
 {
-	unloadShaderProgram();
+	for (int i = 0; i < map_shaders_count; ++i) {
+		// r_delete_shader(&map_shaders[i]);
+		// ???
+	}
 }
 
 static void load_map()
 {
 	#ifdef __DEBUG
-		printf(KMAG "\n== Loading resources ==\n" KNRM);
+		printf(KMAG "\n== Loading assets ==\n" KNRM);
 	#endif
 	
-	for (int i = 0; i < resource_descriptors_count; ++i) {
-		f_load_resource_file(&resource_descriptors[i]);
-	}
-	
-	#ifdef __DEBUG
-		printf("\n-- Attempting to upload texture memory...\n");
-	#endif
-
-	for (int i = 0; i < texture_resource_descriptors_count; ++i) {
-		map_asset_t *asset = get_asset(texture_resource_descriptors[i].id);
-		r_create_texture(&texture_resource_descriptors[i].gl_id, asset->image);
-	}
-	
-	#ifdef __DEBUG
-		printf("\n-- Attempting to load shaders...\n");
-	#endif
-
-	for (int i = 0; i < shader_descriptors_count; ++i) {
-		r_load_shader_files(&shader_descriptors[i].gl_id, 
-			shader_descriptors[i].vertex_filename, 
-			shader_descriptors[i].fragment_filename);
+	for (int i = 0; i < map_assets_count; ++i) {
+		f_load_map_asset_file(&map_assets[i]);
 	}
 
 	#ifdef __DEBUG
-		printf("\n-- Attempting to create sound emitters...\n");
+		printf("\n-- Creating shaders...\n");
 	#endif
-	
-	// creating sound emitters..
-	for (int i = 0; i < sound_descriptors_count; ++i) {
-		s_create_sound_emitter(&sound_descriptors[i]);
+
+	for (int i = 0; i < map_shaders_count; ++i) {
+		f_load_map_shader_file(&map_shaders[i]);
 	}
 	
 	#ifdef __DEBUG
-		printf("\n-- Attempting to load map...\n");
+		printf("\n-- Creating textures...\n");
+	#endif
+
+	for (int i = 0; i < map_textures_count; ++i) {
+		
+		map_asset_t *asset = get_asset(map_textures[i].asset_id);
+		r_create_texture(&map_textures[i], (bitmap_t*)asset->pdata);
+
+		// actually unecessary...
+		bitmap_t *image = (bitmap_t*)asset->pdata;
+		map_textures[i].width = image->width;
+		map_textures[i].height = image->height;
+		map_textures[i].channels = image->colors;      
+		map_textures[i].hasalpha = image->colors > 3;
+		map_textures[i].bitsperpixel = image->bitdepth;
+	}
+	
+	#ifdef __DEBUG
+		printf("\n-- Creating sound emitters...\n");
+	#endif
+	
+	// create sound emitters from loaded audio buffers
+	for (int i = 0; i < map_sound_emitters_count; ++i) {
+		s_create_sound_emitter(&map_sound_emitters[i]);
+	}
+	
+	#ifdef __DEBUG
+		printf("\n-- Creating geometry...\n");
 	#endif
 	
 	// Load the map from file
@@ -195,7 +207,7 @@ typedef enum {
 
 void animate_player()
 {
-	static last_stress_level = 0.0, stress_increase = 0.0;		// for animation speeds
+	static float last_stress_level = 0.0, stress_increase = 0.0;		// for animation speeds
 
     static bool walked_step = false;
 	static bool waiting_to_move = true;
@@ -411,7 +423,7 @@ void update()
 
 		/* check "collision" with triggers */
 		int i;
-		h_trigger trigger;
+		t_trigger* trigger;
 		if ( g_triggers->count > 0 )
 		{
 			array_set_internal_position(g_triggers, 0);
