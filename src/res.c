@@ -1,7 +1,6 @@
 #include "shared.h"
 #include "res.h"
 
-#include "bitmap.h"
 #include "sound.h"
 #include "shader.h"
 #include "texture.h"
@@ -9,6 +8,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 
 static map_asset_t *_map_assets_head = NULL;
 static map_asset_t *_map_assets_tail = NULL;
@@ -18,14 +20,17 @@ static void add_asset(map_asset_t *asset)
 {
 	asset->next = NULL;
 
-	if (_map_asset_count == 0) {
+	if (_map_assets_head == NULL) {
 		_map_assets_head = asset;
-		_map_assets_tail = asset;
 	}
 	
 	else {
 		_map_assets_tail->next = asset;
 	}
+
+	_map_assets_tail = asset;
+
+	// printf("Added asset [%d -> %d].\n", _map_asset_count, asset->id);
 
 	_map_asset_count++;
 }
@@ -34,34 +39,62 @@ map_asset_t *get_asset(int id)
 {
 	for (map_asset_t *asset = _map_assets_head; 
 		asset->next != NULL; 
-		asset = asset->next) 
+		asset = asset->next)
 	{
-		if (asset->asset_id == id) {
+		// printf("\tlooking for asset %d at [%d]\n", id, asset->id);
+
+		if (asset->id == id) {
 			return asset;
 		}
 	}
 
+	printf("Asset %d not found!\n",id);
+
 	return NULL;
 }
 
-static int load_image_asset_from_file(map_asset_t *asset, const char *filename)
+static texture_t *create_texture_image_from_file(const char *filename)
 {
-	return f_load_bitmap_file(filename, (bitmap_t*)asset->pdata);
+	/* TODO: maybe move the image loading stuff to texture.c just like sound.c */
+
+	texture_t *obj;
+
+	int w, h, n;
+	unsigned char *data = stbi_load(filename, &w, &h, &n, 0);
+
+	obj = (texture_t*)calloc(1, sizeof(texture_t));
+	if (!obj) {
+		return STATUS_FAILURE;
+	}
+
+	if (r_create_texture_buf(obj, w, h, n, data) == STATUS_FAILURE) {
+		return NULL;
+	}
+
+	stbi_image_free(data);
+
+	return obj;
 }
 
-static int load_sound_asset_from_file(map_asset_t *asset, const char *filename)
+static audio_buffer_t * create_sound_buffer_from_file(const char *filename)
 {
-	return f_load_sound_file(filename, (audio_buffer_t*)asset->pdata);
+	audio_buffer_t *obj;
+
+	if (f_load_sound_file(filename, &obj) == STATUS_FAILURE) {
+		return NULL;
+	}
+
+	return obj;
 }
 
 int f_load_map_asset_file(const map_asset_descriptor_t *desc)
 {
 	char filename[1024];
-	strcpy(filename, env_base_path);
+	strcpy(filename, env_asset_path);
 	strcat(filename, desc->filename);
 
 	#ifdef __DEBUG
-		printf("-- loading resource %d from file %s\n", desc->asset_id, filename);
+		printf("-- loading asset %d from file %s\n", desc->asset_id, filename);
 	#endif
 
 	map_asset_t *asset = (map_asset_t*)calloc(1, sizeof(map_asset_t));
@@ -70,7 +103,7 @@ int f_load_map_asset_file(const map_asset_descriptor_t *desc)
 		FATAL_RET("failed to create map asset storage!");
 	}
 
-	asset->asset_id = desc->asset_id;
+	asset->id = desc->asset_id;
 	asset->type = desc->type;
 
 	int status = STATUS_SUCCESS;
@@ -78,11 +111,11 @@ int f_load_map_asset_file(const map_asset_descriptor_t *desc)
 	switch (asset->type) {
 
 		case ASSET_IMAGE:
-			status = load_image_asset_from_file(asset, filename);
+			asset->obj = create_texture_image_from_file(filename);
 			break;
 
 		case ASSET_SOUND:
-			status = load_sound_asset_from_file(asset, filename);
+			asset->obj = create_sound_buffer_from_file(filename);
 			break;
 	}
 
@@ -93,31 +126,37 @@ int f_load_map_asset_file(const map_asset_descriptor_t *desc)
 
 int f_load_map_shader_file(const map_shader_descriptor_t *desc)
 {
-	map_asset_t *asset = (map_asset_t*)calloc(1, sizeof(map_asset_t));
-
-	asset->asset_id = desc->asset_id;
-	asset->type = ASSET_SHADER;
+	int status;
+	shader_t *shader;
 
 	char vertex_filename[1024];
-	strcpy(vertex_filename, env_base_path);
+	strcpy(vertex_filename, env_asset_path);
 	strcat(vertex_filename, desc->vertex_filename);
 
 	char fragment_filename[1024];
-	strcpy(fragment_filename, env_base_path);
+	strcpy(fragment_filename, env_asset_path);
 	strcat(fragment_filename, desc->fragment_filename);
 
-	shader_t *shader;
-	if( (shader = (shader_t*)malloc(sizeof(bitmap_t))) == NULL ) {
+	map_asset_t *asset = (map_asset_t*)calloc(1, sizeof(map_asset_t));
+	if (!asset) {
+		return STATUS_FAILURE;
+	}
+
+	asset->id = desc->asset_id;
+	asset->type = ASSET_SHADER;
+
+	if( (shader = (shader_t*)malloc(sizeof(shader_t))) == NULL ) {
 		ERROR_RET("Error creating shader.");
 	}
 
-	int status  = r_load_shader_files(shader, vertex_filename, fragment_filename);
+	status  = r_load_shader_files(shader, vertex_filename, fragment_filename);
+	if (status == STATUS_FAILURE) {
+		return status;
+	}
 
-	asset->pdata = shader;
-	// what the..
-	shader->asset_id = asset->asset_id;
+	asset->obj = (void*)shader;
 
 	add_asset(asset);
 
-	return status;
+	return STATUS_SUCCESS;
 }

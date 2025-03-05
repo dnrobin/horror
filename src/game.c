@@ -45,25 +45,7 @@ static void load_map()
 	#endif
 
 	for (int i = 0; i < map_shaders_count; ++i) {
-		f_load_map_shader_file(&map_shaders[i]);
-	}
-	
-	#ifdef __DEBUG
-		printf("\n-- Creating textures...\n");
-	#endif
-
-	for (int i = 0; i < map_textures_count; ++i) {
-		
-		map_asset_t *asset = get_asset(map_textures[i].asset_id);
-		r_create_texture(&map_textures[i], (bitmap_t*)asset->pdata);
-
-		// actually unecessary...
-		bitmap_t *image = (bitmap_t*)asset->pdata;
-		map_textures[i].width = image->width;
-		map_textures[i].height = image->height;
-		map_textures[i].channels = image->colors;      
-		map_textures[i].hasalpha = image->colors > 3;
-		map_textures[i].bitsperpixel = image->bitdepth;
+		// f_load_map_shader_file(&map_shaders[i]);
 	}
 	
 	#ifdef __DEBUG
@@ -80,7 +62,7 @@ static void load_map()
 	#endif
 	
 	// Load the map from file
-	loadMap("res/maps/map1.map");
+	loadMap("maps/map1.map");
 }
 
 void init()
@@ -157,6 +139,10 @@ void init()
 
 void shutdown()
 {
+	#ifdef __DEBUG
+		printf(KMAG "\n== Shutting down ==\n" KNRM);
+	#endif
+
 	unload_map();
 }
 
@@ -397,7 +383,7 @@ void update()
 	
 	update_stress_response();
 
-	sound_update_listener(&g_camera->position, &g_camera->look, &g_camera->up);
+	s_sound_update_listener(&g_camera->position, &g_camera->look, &g_camera->up);
 
 	if ( g_state[G_PHY_CLIPPING] )
 	{

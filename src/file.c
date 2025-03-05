@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int f_read_text_file(const char *filename, char *data, size_t *len)
+int f_read_text_file(const char *filename, char **data, size_t *len)
 {
 	FILE *fp = fopen(filename, "r");
 
@@ -17,6 +17,7 @@ int f_read_text_file(const char *filename, char *data, size_t *len)
     fseek(fp, 0, SEEK_SET);
 
     char *p = (char*)calloc(1, n + 1);
+
     if (!p) {
         FATAL_RET("Error allocating memory for file '%s'!\n", filename);
     }
@@ -25,7 +26,7 @@ int f_read_text_file(const char *filename, char *data, size_t *len)
         FATAL_RET("Failed to read text file '%s'!\n", filename);
     }
     
-    data = p;
+    *data = p;
     *len = n;
 
     fclose(fp);

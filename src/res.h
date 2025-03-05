@@ -4,7 +4,7 @@
 typedef enum {
 	ASSET_MODEL,		// 3d model file to be loaded as a render model_t
 	ASSET_IMAGE,		// texture image file to be loaded as texture_t
-	ASSET_SOUND,		// texture image file to be loaded as audio_buffer_t
+	ASSET_SOUND,		// sound file to be loaded as audio_buffer_t
 	ASSET_MUSIC,
 	ASSET_SHADER,
 	
@@ -13,36 +13,45 @@ typedef enum {
 
 /* represents assets to be loaded from file: image, sound, model, etc. */
 typedef struct {
-	int 					asset_id;		// globally unique identifier
+	int 					asset_id;		// must be globally unique identifier
 	asset_type_t 			type;
 	const char 				*filename;
 } map_asset_descriptor_t;
 
+/**
+ * loads an asset from file and creates an asset object from the subsystem
+ * representation (ex. texture, sound buffer, etc.) which can can accessed
+ * by the same asset id.
+ */
 int f_load_map_asset_file(const map_asset_descriptor_t *desc);
 
 typedef struct {
-	int 					asset_id;		// globally unique identifier
+	int 					asset_id;		// must be globally unique identifier
 	const char 				*vertex_filename;
 	const char 				*fragment_filename;
 } map_shader_descriptor_t;
 
+/**
+ * loads shader source code from files and creates a shader_t object which
+ * can be accessed by the same asset id.
+ */
 int f_load_map_shader_file(const map_shader_descriptor_t *desc);
 
 /* represents assets which are loaded and converted to subsystem objects */
 typedef struct map_asset_s {
 
-	int 					asset_id;		// globally unique idendifier
+	int 					id;				// globally unique idendifier
 
 	asset_type_t 			type;			// asset class type
 	
-	void 					*pdata;			// generic pointer to asset data
+	void 					*obj;			// pointer to the subsystem object
 
 	// note: subsystems are responsible for setting this
 	// pointer when creating the asset and only they know
-	// how to dereference this pointer to a meaningful type.
+	// how to dereference this pointer to the correct object
+	// type when interacting with the data.
 
 	struct map_asset_s 		*next;
-	struct map_asset_s 		*prev;
 } map_asset_t;
 
 map_asset_t *get_asset(int id);

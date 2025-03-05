@@ -19,7 +19,7 @@ int loadMapJSON(const char* filename) {
 	char filepath[256];
 	
 	// get full include path to file
-	strcpy(filepath, env_base_path);
+	strcpy(filepath, env_asset_path);
 	strcat(filepath, filename);
 	
 	#ifdef __DEBUG
@@ -218,7 +218,7 @@ int loadMap(const char* filename)
 	t__face* data;
 	
 	// get full include path to file
-	strcpy(filepath, env_base_path);
+	strcpy(filepath, env_asset_path);
 	strcat(filepath, filename);
 	
 	#ifdef __DEBUG
@@ -286,24 +286,24 @@ int loadMap(const char* filename)
 	for ( i = 0; i < map.nb_faces; i ++ ) {
 
 		face = &data[i];
-		
 
-		// printf("\nFACE(%d) - type : %d\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",i,face->type);
-		// printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0].x, face->verts[0].y, face->verts[0].z);
-		// printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1].x, face->verts[1].y, face->verts[1].z);
-		// printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2].x, face->verts[2].y, face->verts[2].z);
-		// printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3].x, face->verts[3].y, face->verts[3].z);
-		// printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0].x, face->tcoords[0].y);
-		// printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1].x, face->tcoords[1].y);
-		// printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2].x, face->tcoords[2].y);
-		// printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3].x, face->tcoords[3].y);
-		// printf("Color 1 : {%0.1f, %0.1f, %0.1f}\n",face->colors[0].r, face->colors[0].g, face->colors[0].b);
-		// printf("Color 2 : {%0.1f, %0.1f, %0.1f}\n",face->colors[1].r, face->colors[1].g, face->colors[1].b);
-		// printf("Color 3 : {%0.1f, %0.1f, %0.1f}\n",face->colors[2].r, face->colors[2].g, face->colors[2].b);
-		// printf("Color 4 : {%0.1f, %0.1f, %0.1f}\n",face->colors[3].r, face->colors[3].g, face->colors[3].b);
-		// printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal.x, face->normal.y, face->normal.z);
-		// printf("TexId : %d\n",face->texid);
-		
+		if (0) {
+			printf("\nFACE(%d) - type : %d\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",i,face->type);
+			printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0].x, face->verts[0].y, face->verts[0].z);
+			printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1].x, face->verts[1].y, face->verts[1].z);
+			printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2].x, face->verts[2].y, face->verts[2].z);
+			printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3].x, face->verts[3].y, face->verts[3].z);
+			printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0].x, face->tcoords[0].y);
+			printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1].x, face->tcoords[1].y);
+			printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2].x, face->tcoords[2].y);
+			printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3].x, face->tcoords[3].y);
+			printf("Color 1 : {%0.1f, %0.1f, %0.1f}\n",face->colors[0].r, face->colors[0].g, face->colors[0].b);
+			printf("Color 2 : {%0.1f, %0.1f, %0.1f}\n",face->colors[1].r, face->colors[1].g, face->colors[1].b);
+			printf("Color 3 : {%0.1f, %0.1f, %0.1f}\n",face->colors[2].r, face->colors[2].g, face->colors[2].b);
+			printf("Color 4 : {%0.1f, %0.1f, %0.1f}\n",face->colors[3].r, face->colors[3].g, face->colors[3].b);
+			printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal.x, face->normal.y, face->normal.z);
+			printf("TexId : %d\n",face->texid);
+		}
 		
 		// set collision surfaces
 		g_collisions[i].v1 = (vec3_t){ face->verts[0].x, (face->normal.y==1.0?-0.35:face->verts[0].y), face->verts[0].z };
@@ -312,9 +312,8 @@ int loadMap(const char* filename)
 		g_collisions[i].v4 = (vec3_t){ face->verts[3].x, (face->normal.y==1.0?-0.35:face->verts[3].y), face->verts[3].z };
 		g_collisions[i].normal = (vec3_t){ face->normal.x, face->normal.y, face->normal.z };
 		
-		// draw vec3_sub(division surfaces for better lighting
 
-		glBindTexture(GL_TEXTURE_2D, face->texid);
+		glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(face->texid)->obj)->gl_handle);
 		glLineWidth(5);
 
 		if (0) {

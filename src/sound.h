@@ -26,11 +26,11 @@ typedef struct {
 	unsigned int buffer_id;
 } audio_buffer_t;
 
-int f_load_sound_file(const char* filename, audio_buffer_t *buf);
+int f_load_sound_file(const char* filename, audio_buffer_t **buf);
 
-typedef struct sound_resource_descriptor {
-	// TODO: decouple this. Asset should contain reference to this object.
-    int                 asset_id;
+typedef struct {
+
+	int asset_id; // here because we need the previously loaded buffer
 
 	unsigned char options;		// option bits
 	float position[3];			// position in world
@@ -48,9 +48,10 @@ typedef struct sound_resource_descriptor {
 	float cone_gain_factor;		// gain multiplier for cone calculations
 	unsigned int buffer_id;		// sound buffer id
 	unsigned int source_id;		// emitter id (sound source id)
-} sound_resource_descriptor_t;
+} sound_emitter_descriptor_t;
 
-typedef struct sound_emitter {
+typedef struct {
+
 	unsigned char options;		// option bits
 	vec3_t position;			// position in world
 	vec3_t velocity;			// velocity if moving to calculate dopler shift
@@ -70,19 +71,15 @@ typedef struct sound_emitter {
 } sound_emitter_t;
 
 
-sound_emitter_t *get_new_sound_emitter(const int sound_buffer_id);
+void s_sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up);
+int s_create_sound_emitter(sound_emitter_descriptor_t *desc);
 
-int add_sound_emitter_to_scene(sound_emitter_t *emitter);
-void sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up);
+void setSound(int source_id, int state_id);
+void playSound(int source_id);
+void stopSound(int source_id);
+void pauseSound(int source_id);
+void rewindSound(int source_id);
 
-void load_sound_emitters(const int soundc, sound_resource_descriptor_t* soundv);
-
-int s_create_sound_emitter(sound_resource_descriptor_t *sound);
-
-void soundSetState(const int source_id, const int state_id);
-
-void playSound(const int source_id);
-void stopSound(const int source_id);
 
 int init_al();
 int shutdown_al();

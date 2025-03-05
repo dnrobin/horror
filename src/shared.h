@@ -27,7 +27,7 @@
 //#define DEBUG_GAME true
 
 /* environment variables */
-char* env_base_path;
+extern char *env_asset_path;
 
 bool g_troubleshoot;
 

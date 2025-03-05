@@ -1,66 +1,67 @@
 #include "shared.h"
 #include "res.h"
 
+#include "timing.h"
+#include "trigger.h"
 #include "texture.h"
 #include "sound.h"
 #include "game.h"
+#include "gamedefs.h"
 
 #include "glad.h"
 
 map_asset_descriptor_t map_assets[] = {
-	{ 987, 	ASSET_IMAGE, "res/textures/walltex_06_diffuse.bmp" },
-	{ 989, 	ASSET_IMAGE, "res/textures/walltex_06_diffuse2.bmp" },
-	{ 988, 	ASSET_IMAGE, "res/textures/floortex_5.bmp" },
-	{ 990, 	ASSET_SOUND, "res/sounds/background_6.wav" },
-	{ 991, 	ASSET_SOUND, "res/sounds/background_3.wav" },
-	{ 992, 	ASSET_SOUND, "res/sounds/music_1.wav" },
-	{ 993, 	ASSET_SOUND, "res/sounds/walk_4.wav" },
-	{ 994, 	ASSET_SOUND, "res/sounds/heart_1.wav" },
-	{ 995, 	ASSET_SOUND, "res/sounds/heart_2.wav" },
-	{ 996, 	ASSET_SOUND, "res/sounds/heart_3.wav" },
-	{ 997, 	ASSET_SOUND, "res/sounds/breathe_1.wav" },
-	{ 998, 	ASSET_SOUND, "res/sounds/breathe_2.wav" },
-	{ 999, 	ASSET_SOUND, "res/sounds/breathe_3.wav" },
-	{ 1000, ASSET_SOUND, "res/sounds/breathe_4.wav" },
-	{ 1001, ASSET_SOUND, "res/sounds/moan_1.wav" },
-	{ 1002, ASSET_SOUND, "res/sounds/footsteps_1.wav" },
-	{ 1003, ASSET_SOUND, "res/sounds/grunt_behind_1.wav" },
-	{ 1004, ASSET_SOUND, "res/sounds/whisper_1.wav" },
-	{ 1005, ASSET_SOUND, "res/sounds/fx_7.wav" },
-	{ 1006, ASSET_SOUND, "res/sounds/fx_8.wav" },
-	{ 1007, ASSET_SOUND, "res/sounds/dark_sound_1.wav" },
-	{ 1008, ASSET_SOUND, "res/sounds/fx_beat_1.wav" },
-	{ 1009, ASSET_SOUND, "res/sounds/intro_naration.wav" },
-	{ 1010, ASSET_SOUND, "res/sounds/background_2.wav" },
-	{ 1011, ASSET_IMAGE, "res/textures/vision_1.bmp" },
-    { 1012, ASSET_SOUND, "res/sounds/grunt_far_1.wav" },
-    { 1013, ASSET_SOUND, "res/sounds/grunt_close_1.wav" },
-    { 1014, ASSET_IMAGE, "res/textures/mask2.bmp" },
-    { 1015, ASSET_IMAGE, "res/textures/noise_1.bmp" },
-    { 1016, ASSET_SOUND, "res/sounds/flash_light_1.wav" },
-    { 1017, ASSET_SOUND, "res/sounds/background_7.wav" },
-    { 1018, ASSET_IMAGE, "res/textures/fog.bmp" }
+	{ 987, 	ASSET_IMAGE, "textures/walltex_06_diffuse.bmp" },
+	{ 989, 	ASSET_IMAGE, "textures/walltex_06_diffuse2.bmp" },
+	{ 988, 	ASSET_IMAGE, "textures/floortex_5.bmp" },
+	{ 990, 	ASSET_SOUND, "sounds/background_6.wav" },
+	{ 991, 	ASSET_SOUND, "sounds/background_3.wav" },
+	{ 992, 	ASSET_SOUND, "sounds/music_1.wav" },
+	{ 993, 	ASSET_SOUND, "sounds/walk_4.wav" },
+	{ 994, 	ASSET_SOUND, "sounds/heart_1.wav" },
+	{ 995, 	ASSET_SOUND, "sounds/heart_2.wav" },
+	{ 996, 	ASSET_SOUND, "sounds/heart_3.wav" },
+	{ 997, 	ASSET_SOUND, "sounds/breathe_1.wav" },
+	{ 998, 	ASSET_SOUND, "sounds/breathe_2.wav" },
+	{ 999, 	ASSET_SOUND, "sounds/breathe_3.wav" },
+	{ 1000, ASSET_SOUND, "sounds/breathe_4.wav" },
+	{ 1001, ASSET_SOUND, "sounds/moan_1.wav" },
+	{ 1002, ASSET_SOUND, "sounds/footsteps_1.wav" },
+	{ 1003, ASSET_SOUND, "sounds/grunt_behind_1.wav" },
+	{ 1004, ASSET_SOUND, "sounds/whisper_1.wav" },
+	{ 1005, ASSET_SOUND, "sounds/fx_7.wav" },
+	{ 1006, ASSET_SOUND, "sounds/fx_8.wav" },
+	{ 1007, ASSET_SOUND, "sounds/dark_sound_1.wav" },
+	{ 1008, ASSET_SOUND, "sounds/fx_beat_1.wav" },
+	{ 1009, ASSET_SOUND, "sounds/intro_naration.wav" },
+	{ 1010, ASSET_SOUND, "sounds/background_2.wav" },
+	{ 1011, ASSET_IMAGE, "textures/vision_1.bmp" },
+    { 1012, ASSET_SOUND, "sounds/grunt_far_1.wav" },
+    { 1013, ASSET_SOUND, "sounds/grunt_close_1.wav" },
+    { 1014, ASSET_IMAGE, "textures/mask2.bmp" },
+    { 1015, ASSET_IMAGE, "textures/noise_1.bmp" },
+    { 1016, ASSET_SOUND, "sounds/flash_light_1.wav" },
+    { 1017, ASSET_SOUND, "sounds/background_7.wav" },
+    { 1018, ASSET_IMAGE, "textures/fog.bmp" }
 };
 const int map_assets_count = sizeof(map_assets) / sizeof(map_asset_descriptor_t);
 
 map_shader_descriptor_t map_shaders[] = {
-	// TODO: add shader parameters here like locations, attribs, etc...
-	{ 100, "res/shaders/default.vert", "res/shaders/default.frag" }
+	{ 100, "shaders/default.vert", "shaders/default.frag" }
 };
 const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor_t);
 
-texture_t map_textures[] = {
-	{ .asset_id = 987 },
-	{ .asset_id = 988 },
-	{ .asset_id = 989 },
-	{ .asset_id = 1011 },
-    { .asset_id = 1014 },
-    { .asset_id = 1015 },
-    { .asset_id = 1018 },
-};
-const int map_textures_count = sizeof(map_textures) / sizeof(texture_t);
+// ********************************************************************
+// END MAP RESOURCE DEFINITIONS
+// ********************************************************************
 
-sound_resource_descriptor_t map_sound_emitters[] = {
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// World/scene defs
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+sound_emitter_descriptor_t map_sound_emitters[] = {
 	{ 990, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.12, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 991, SOUND_EMIT_LOOPED, {1.0, 2.0, -14.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.35, 1.0, 56.0, 5.0, 7.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 992, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.4, 1.0, 30.0, 0.1, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 0 },
@@ -87,17 +88,7 @@ sound_resource_descriptor_t map_sound_emitters[] = {
     { 1016, 0, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, 0.05, 1.0, 1.0, 0, 0, 1, 1, 0, 0, 1, 0, 0 },
     { 1017, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.1, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 };
-const int map_sound_emitters_count = sizeof(map_sound_emitters) / sizeof(sound_resource_descriptor_t);
-
-// ********************************************************************
-// END MAP RESOURCE DEFINITIONS
-// ********************************************************************
-
-// walking animation
-float g_player_walk_anim_frames_count = 100;
-float g_player_walk_anim_frames[100] = {0, 0, 0, 0, 0, 0, -0.28661436, -0.903256429, -1.476376847, -2.000888557, -2.472135955, -2.885936216, -3.23861642, -3.527046152, -3.748665289, -3.901506725, -3.984213827, -3.996052483, -3.936917611, -3.807334096, -3.60845213, -3.342037005, -3.01045344, -2.616644594, -2.164105942, -1.656854249, -1.099391918, -0.496667023, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.496667023, -1.099391918, -1.656854249, -2.164105942, -2.616644594, -3.01045344, -3.342037005, -3.60845213, -3.807334096, -3.936917611, -3.996052483, -3.984213827, -3.901506725, -3.748665289, -3.527046152, -3.23861642, -2.885936216, -2.472135955, -2.000888557, -1.476376847, -0.903256429, -0.28661436, 0, 0, 0, 0, 0};
-
-/* trigger callbacks */
+const int map_sound_emitters_count = sizeof(map_sound_emitters) / sizeof(sound_emitter_descriptor_t);
 
 static void setStressLevel(const float level) {
 	// impact on anxiety

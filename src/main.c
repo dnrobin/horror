@@ -34,17 +34,20 @@ char* g_window_title = "Dark Maze";
 bool g_fullscreen = true;
 uint g_frame_millisec = 26;
 
-void env_get_paths(char* unixpath)
-{
-	char* str = strrchr(unixpath, '/');
+
+char *env_asset_path = "./res/";
+
+// void env_get_paths(char* unixpath)
+// {
+// 	char* str = strrchr(unixpath, '/');
 	
-	unsigned int len = strlen(unixpath) - strlen(str) + 1; // +1 to keep last '/'
+// 	unsigned int len = strlen(unixpath) - strlen(str) + 1; // +1 to keep last '/'
 	
-	env_base_path = (char*)malloc(len);
+// 	env_base_path = (char*)malloc(len);
 	
-	// store base path
-	strncpy(env_base_path, unixpath, len);
-}
+// 	// store base path
+// 	strncpy(env_base_path, unixpath, len);
+// }
 
 void error_callback(int error, const char* description)
 {
@@ -152,7 +155,7 @@ int main(int argc, char* argv[])
 
 	printf("Launching from: %s\n\n",argv[0]);
 	
-	env_get_paths(argv[0]);				// get launch base path for loading resources
+	// env_get_paths(argv[0]);				// get launch base path for loading resources
 	
 	if ( g_fullscreen && strcmp(argv[argc-1],"-f") == 0 ) glfwMaximizeWindow(win);		// Put into full screen
 	

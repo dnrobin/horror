@@ -8,14 +8,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-static int create_shader_with_source(GLuint *shader, GLenum type, const char* source, int *len)
+static int create_shader_with_source(GLuint *shader, GLenum type, const char* const* source, int *len)
 {
 	GLuint handle = 0;
-	const char *src = &source;
 
 	handle = glCreateShader(type);
 
-	glShaderSource(handle, 1, &src, len);
+	glShaderSource(handle, 1, source, NULL);
 
 	glCompileShader(handle);
 
@@ -38,35 +37,37 @@ static int create_shader_with_source(GLuint *shader, GLenum type, const char* so
 	return STATUS_SUCCESS;
 }
 
-int r_create_shader_source(shader_t *shader, const char *vertex_shader_source, int vertex_shader_length, const char *fragment_shader_source, int fragment_shader_length)
+int r_create_shader_source(shader_t *shader, const char * const* vertex_shader_source, int vertex_shader_length, const char * const* fragment_shader_source, int fragment_shader_length)
 {
 	GLuint vertex_shader;
+	GLuint fragment_shader;
+	GLuint shader_program;
 
 	if (STATUS_FAILURE == create_shader_with_source(&vertex_shader, GL_VERTEX_SHADER, vertex_shader_source, &vertex_shader_length)) {
 		return STATUS_FAILURE;
 	}
 
-	GLuint fragment_shader;
-
 	if (STATUS_FAILURE == create_shader_with_source(&fragment_shader, GL_FRAGMENT_SHADER, fragment_shader_source, &fragment_shader_length)) {
 		return STATUS_FAILURE;
 	}
 
-	shader->gl_handle = glCreateProgram();
-	glAttachShader(shader->gl_handle, vertex_shader);
-	glAttachShader(shader->gl_handle, fragment_shader);
-	
-	glLinkProgram(shader->gl_handle);
+	shader_program = glCreateProgram();
+	glAttachShader(shader_program, vertex_shader);
+	glAttachShader(shader_program, fragment_shader);
+
+	// TODO: define fixed locations here...
+
+	glLinkProgram(shader_program);
 	 
 	GLint program_linked;
-	glGetProgramiv(shader->gl_handle, GL_LINK_STATUS, &program_linked);
+	glGetProgramiv(shader_program, GL_LINK_STATUS, &program_linked);
 	if (program_linked != GL_TRUE)
 	{
 		GLsizei log_length = 0;
 		GLchar info_log[1024];
-		glGetProgramInfoLog(shader->gl_handle, 1024, &log_length, info_log);
+		glGetProgramInfoLog(shader_program, 1024, &log_length, info_log);
 
-		glDeleteProgram(shader->gl_handle);
+		glDeleteProgram(shader_program);
 		glDeleteShader(vertex_shader);
 		glDeleteShader(fragment_shader);
 		
@@ -76,6 +77,8 @@ int r_create_shader_source(shader_t *shader, const char *vertex_shader_source, i
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
 
+	shader->gl_handle = shader_program;
+
 	return STATUS_SUCCESS;
 }
 
@@ -84,22 +87,21 @@ int r_load_shader_files(shader_t *shader, const char *vertex_file, const char *f
 	char *vertex_shader_source;
 	int vertex_shader_length;
 
-	char vertex_full_file[1024];
-	strcpy(vertex_full_file, env_base_path);
-	strcat(vertex_full_file, vertex_file);
+	f_read_text_file(vertex_file, &vertex_shader_source, &vertex_shader_length);
 
-	f_read_text_file(vertex_full_file, vertex_shader_source, &vertex_shader_length);
+	// CA PEUT PAS ETRE ZERO!!!!
+	printf("%x\n",vertex_shader_source);
+
+	printf("~~~\n%s\n~~~\n", vertex_shader_source);
 
 	char *fragment_shader_source;
 	int fragment_shader_length;
 
-	char fragment_full_file[1024];
-	strcpy(fragment_full_file, env_base_path);
-	strcat(fragment_full_file, fragment_file);
+	f_read_text_file(fragment_file, &fragment_shader_source, &fragment_shader_length);
 
-	f_read_text_file(fragment_full_file, fragment_shader_source, &fragment_shader_length);
+	printf("~~~\n%s\n~~~\n", fragment_shader_source);
 
-	return r_create_shader_source(shader, vertex_shader_source, vertex_shader_length, fragment_shader_source, fragment_shader_length);
+	return r_create_shader_source(shader, &vertex_shader_source, vertex_shader_length, &fragment_shader_source, fragment_shader_length);
 }
 
 void r_delete_shader(shader_t *shader)
