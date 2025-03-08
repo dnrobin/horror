@@ -16,6 +16,28 @@ static map_asset_t *_map_assets_head = NULL;
 static map_asset_t *_map_assets_tail = NULL;
 static size_t _map_asset_count = 0;
 
+static const char *_debug_asset_type_names[] = {
+	"ASSET_MODEL",
+	"ASSET_IMAGE",
+	"ASSET_SOUND",
+	"ASSET_MUSIC",
+	"ASSET_SHADER",
+};
+
+void _debug_print_asset_list()
+{
+	map_asset_t *a = _map_assets_head;
+
+	printf("~~~ debug print asset list:\n");
+	for (int i = 0; i < _map_asset_count; ++i)
+	{
+		printf("asset #%d: %s\n", a->id, _debug_asset_type_names[a->type]);
+
+		a = a->next;
+	}
+	printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n");
+}
+
 static void add_asset(map_asset_t *asset)
 {
 	asset->next = NULL;
@@ -37,15 +59,16 @@ static void add_asset(map_asset_t *asset)
 
 map_asset_t *get_asset(int id)
 {
-	for (map_asset_t *asset = _map_assets_head; 
-		asset->next != NULL; 
-		asset = asset->next)
+	map_asset_t *a = _map_assets_head;
+	for (int i = 0; i < _map_asset_count; ++i)
 	{
 		// printf("\tlooking for asset %d at [%d]\n", id, asset->id);
 
-		if (asset->id == id) {
-			return asset;
+		if (a->id == id) {
+			return a;
 		}
+
+		a = a->next;
 	}
 
 	printf("Asset %d not found!\n",id);
@@ -60,7 +83,7 @@ static texture_t *create_texture_image_from_file(const char *filename)
 	texture_t *obj;
 
 	int w, h, n;
-	unsigned char *data = stbi_load(filename, &w, &h, &n, 0);
+	unsigned char *data = stbi_load(filename, &w, &h, &n, 4);
 
 	obj = (texture_t*)calloc(1, sizeof(texture_t));
 	if (!obj) {
@@ -153,6 +176,10 @@ int f_load_map_shader_file(const map_shader_descriptor_t *desc)
 	if (status == STATUS_FAILURE) {
 		return status;
 	}
+
+	#ifdef __DEBUG
+		printf("-- loaded shader %d from files: %s, %s, (gl id %d)\n", desc->asset_id, desc->vertex_filename, desc->fragment_filename, shader->gl_handle);
+	#endif
 
 	asset->obj = (void*)shader;
 

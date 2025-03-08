@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.inc": "c",
+        "stdio.h": "c",
+        "shared.h": "c",
+        "logging.h": "c",
+        "file.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "__locale": "c",
+        "res.h": "c"
+    }
+}

@@ -10,7 +10,36 @@
 
 #include "glad.h"
 
-map_asset_descriptor_t map_assets[] = {
+#define MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO 		1
+#define MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL 		2
+#define MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS 	3
+#define MAP_ASSET_TEXTURE_BRICKWALL_1_METALLIC 		4
+#define MAP_ASSET_TEXTURE_BRICKWALL_1_DISPLACE 		5
+
+#define MAP_ASSET_TEXTURE_STONEWALL_1_ALBEDO 		6
+#define MAP_ASSET_TEXTURE_STONEWALL_1_NORMAL 		7
+#define MAP_ASSET_TEXTURE_STONEWALL_1_ROUGHNESS 	8
+#define MAP_ASSET_TEXTURE_STONEWALL_1_METALLIC 		9
+#define MAP_ASSET_TEXTURE_STONEWALL_1_DISPLACE 		10
+#define MAP_ASSET_TEXTURE_STONEWALL_1_AO 			11
+
+#define MAP_ASSET_DEFAULT_SHADER 100
+
+static map_asset_descriptor_t map_assets[] = {
+
+	{ MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_albedo.jpg" },
+	{ MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_normal.png" },
+	{ MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_roughness.jpg" },
+	{ MAP_ASSET_TEXTURE_BRICKWALL_1_METALLIC, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_metallic.jpg" },
+	{ MAP_ASSET_TEXTURE_BRICKWALL_1_DISPLACE, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_displacement.tiff" },
+
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_ALBEDO, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_albedo.png" },
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_NORMAL, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_normal-ogl.png" },
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_ROUGHNESS, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_roughness.png" },
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_METALLIC, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_metallic.png" },
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_DISPLACE, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_height.png" },
+	// { MAP_ASSET_TEXTURE_STONEWALL_1_AO, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_ao.png" },
+
 	{ 987, 	ASSET_IMAGE, "textures/walltex_06_diffuse.bmp" },
 	{ 989, 	ASSET_IMAGE, "textures/walltex_06_diffuse2.bmp" },
 	{ 988, 	ASSET_IMAGE, "textures/floortex_5.bmp" },
@@ -44,12 +73,12 @@ map_asset_descriptor_t map_assets[] = {
     { 1017, ASSET_SOUND, "sounds/background_7.wav" },
     { 1018, ASSET_IMAGE, "textures/fog.bmp" }
 };
-const int map_assets_count = sizeof(map_assets) / sizeof(map_asset_descriptor_t);
+static const int map_assets_count = sizeof(map_assets) / sizeof(map_asset_descriptor_t);
 
-map_shader_descriptor_t map_shaders[] = {
-	{ 100, "shaders/default.vert", "shaders/default.frag" }
+static map_shader_descriptor_t map_shaders[] = {
+	{ MAP_ASSET_DEFAULT_SHADER, "shaders/default.vert", "shaders/default.frag" }
 };
-const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor_t);
+static const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor_t);
 
 // ********************************************************************
 // END MAP RESOURCE DEFINITIONS
@@ -61,7 +90,7 @@ const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor
 // World/scene defs
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-sound_emitter_descriptor_t map_sound_emitters[] = {
+static sound_emitter_descriptor_t map_sound_emitters[] = {
 	{ 990, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.12, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 991, SOUND_EMIT_LOOPED, {1.0, 2.0, -14.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.35, 1.0, 56.0, 5.0, 7.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
 	{ 992, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.4, 1.0, 30.0, 0.1, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 0 },
@@ -85,10 +114,10 @@ sound_emitter_descriptor_t map_sound_emitters[] = {
 	{ 1010, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {-4.0, -1.0, -14.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.01, 1.0, 56.0, 0.25, 3.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
     { 1012, SOUND_EMIT_GLOBAL, {-9.0, 0.0, -11.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.24, 1.0, 4.0, 0.06, 5.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
     { 1013, SOUND_EMIT_GLOBAL, {-9.0, 0.0, -11.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.62, 1.0, 4.0, 0.08, 5.0, 0.0, 1.0, 0, 0, 0, 0, 0 },
-    { 1016, 0, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, 0.05, 1.0, 1.0, 0, 0, 1, 1, 0, 0, 1, 0, 0 },
+    { 1016, 0, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 1.0}, 0.15, 1.0, 1.0, 0, 0, 1, 1, 0, 0, 1, 0, 0 },
     { 1017, SOUND_EMIT_GLOBAL | SOUND_EMIT_LOOPED | SOUND_EMIT_AUTOPLAY, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0.1, 1.0, 1.0, 0, 0, 1.0, 1.0, 0, 0, 0, 0, 0 },
 };
-const int map_sound_emitters_count = sizeof(map_sound_emitters) / sizeof(sound_emitter_descriptor_t);
+static const int map_sound_emitters_count = sizeof(map_sound_emitters) / sizeof(sound_emitter_descriptor_t);
 
 static void setStressLevel(const float level) {
 	// impact on anxiety
@@ -262,8 +291,8 @@ static void trigger_step_3c() {
     add_timer(650, &trigger_step_3c_1);
 }
 
-t_trigger triggers[] = {
-	// { &trigger_player_start_event, {0.0, 0.0, 0.0}, 0, 0, 0, 0, 0 },
+static t_trigger triggers[] = {
+	{ &trigger_player_start_event, {0.0, 0.0, 0.0}, 0, 0, 0, 0, 0 },
 	{ &trigger_step_1a0, {4.0, 0.0, -2.25}, 0, 0, 0, 0, 0 },
     { &trigger_step_1a, {-2.0, 0.0, -1.0}, 0, 0, 0, 0, 0 },
 	{ &trigger_step_1b, {-7.0, 0.0, -5.0}, 0, 0, 0, 0, 0 },
@@ -273,5 +302,4 @@ t_trigger triggers[] = {
     { &trigger_step_3b, {15.25, 0.0, 15.5}, 0, 0, 0, 0, 0 },
 	{ &trigger_step_3c, {16.25, 0.0, 16.25}, 0, 0, 0, 0, 0 },
 };
-
-const int triggers_count = sizeof(triggers) / sizeof(t_trigger);
+static const int triggers_count = sizeof(triggers) / sizeof(t_trigger);

@@ -1,13 +1,12 @@
 #version 120
 
-varying vec2 TextCoord0;
-
+varying vec2 texCoord;
 varying vec3 fragPosition;
 varying vec3 fragNormal;
 
 void main()
 {
-	TextCoord0 = gl_MultiTexCoord0.st;
+	texCoord = gl_MultiTexCoord0.st;
 	gl_FrontColor = gl_Color;
 
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;

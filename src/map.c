@@ -1,6 +1,7 @@
 #include "shared.h"
 #include "map.h"
 
+#include "map_definitions.inc"
 
 #include "game.h"
 #include "res.h"
@@ -316,6 +317,13 @@ int loadMap(const char* filename)
 		glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(face->texid)->obj)->gl_handle);
 		glLineWidth(5);
 
+		// glActiveTexture(GL_TEXTURE0 + 0);
+		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO)->obj)->gl_handle);
+		// glActiveTexture(GL_TEXTURE0 + 1);
+		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL)->obj)->gl_handle);
+		// glActiveTexture(GL_TEXTURE0 + 2);
+		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS)->obj)->gl_handle);
+
 		if (0) {
 		
 			subdivision4(
@@ -333,7 +341,10 @@ int loadMap(const char* filename)
 			glBegin(GL_QUADS);
 			
 			for (int j = 0; j < 4; ++j) {
-				glTexCoord2f(face->tcoords[j].x, face->tcoords[j].y);
+				// glTexCoord2f(face->tcoords[j].x, face->tcoords[j].y);
+				glMultiTexCoord2f(GL_TEXTURE0 + 0, face->tcoords[j].x, face->tcoords[j].y);
+				glMultiTexCoord2f(GL_TEXTURE0 + 1, face->tcoords[j].x, face->tcoords[j].y);
+				glMultiTexCoord2f(GL_TEXTURE0 + 2, face->tcoords[j].x, face->tcoords[j].y);
 				glColor4f(face->colors[j].r,face->colors[j].r,face->colors[j].r, 1.0);
 				glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j].z);
 			}

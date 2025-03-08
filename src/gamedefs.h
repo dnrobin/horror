@@ -93,7 +93,7 @@ bool MY_SUPER_FLAG;
 #define G_SOUND_ID_PLAYER_CROUCHED		16
 #define G_SOUND_ID_PLAYER_DRAG			16
 
-#define G_SOUND_ID_FLASH_LIGHT			26
+#define G_SOUND_ID_FLASH_LIGHT			23
 
 #define G_SOUND_ID_SHEMALE				1
 #define G_SOUND_ID_DISTURBING_MUSIC		2	// not used anymore?

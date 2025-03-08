@@ -30,46 +30,34 @@ void display() {
 	float flare = 0.1 * ( 7.0 + sin(.1*PI*t) + sin(3*PI*twirl1) + sin(.4*PI*t) + 2*sin(.7*PI*twirl3/3)*sin(.3*PI*t) );
 	
 	glClearAccum(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.05, 0.1, 0.4, 1.0);
 	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);  				// Clear the color buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+
+	// /* MOVE ME AT SCREEN SPACE (ORTHO)! */
+	// float FPS = 1.0 / getEllapsedSeconds(TIMER_FPS);
+    // char buf[256];
+ 	// snprintf (buf, sizeof(buf), "FPS : %f", FPS);
+    // // printScreen(10, 10, 1.0, 1.0, 1.0, buf);
+	// /* MOVE ME AT SCREEN SPACE (ORTHO)! */
 
 	glBlendFunc(GL_ONE, GL_ZERO);
 	glDepthFunc(GL_LESS);
 	
-	glMatrixMode(GL_PROJECTION);									// Select The Projection Matrix	
-	glLoadIdentity();												// Reset The Projection Matrix
-	gluPerspective(g_player_fov, g_window_width/(float)g_window_height, 0.1, 100.0);						// Set to perspective rendering
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(g_player_fov, g_window_width/(float)g_window_height, 0.1, 100.0);
+	// gluOrtho2D(0, g_window_width, 0, g_window_height);
 	
-	glMatrixMode(GL_MODELVIEW);	 									// To operate on the model-view matrix
-	glLoadIdentity();				  								// Reset model-view matrix
-
-	float FPS = 1.0 / getEllapsedSeconds(TIMER_FPS);
-    char buf[256];
- 	snprintf (buf, sizeof(buf), "FPS : %f", FPS);
-    // printScreen(10, 10, 1.0, 1.0, 1.0, buf);
-
-	// pitch tilt..
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	glRotatef(m_deg(g_camera->rotation.x + g_camera->rotation_offset.x), 1.0, 0.0, 0.0);
-	// yaw tilt..
 	glRotatef(m_deg(g_camera->rotation.y + g_camera->rotation_offset.y), 0.0, 1.0, 0.0);
-	
 	glTranslatef(
 		-(g_camera->position.x + g_camera->position_offset.x),
 		-(g_camera->position.y + g_camera->position_offset.y),
 		-(g_camera->position.z + g_camera->position_offset.z)
 	);
-
-	// show wireframe
-	if ( g_state[G_SHOW_WIREFRAME] ) {
-		glBlendFunc(GL_ONE, GL_ONE);
-		glCallList(GL_LIST_ID_WIREFRAME);
-		glBlendFunc(GL_ONE, GL_ZERO);
-	} else {
-		// draw scene
-		glBlendFunc(GL_ONE, GL_ZERO);
-		glCallList(GL_LIST_ID_MAP);
-		glBlendFunc(GL_ONE, GL_ZERO);
-	}
 
 	// create light source to follow player around
 	vec3_t light_offset = (vec3_t){-0.16, -0.02, -0.35};
@@ -172,21 +160,24 @@ void display() {
         // glutSolidTeapot(0.2);
     glPopMatrix();
 	
+
 	// activate/deactivate player light
-	if ( g_state[G_HAS_FLASH_LIGHT] && g_state[G_WITH_FLASH_LIGHT] && g_state[G_PLAYER_LIGHT_ON] ) {
-		glEnable(GL_LIGHT1);
-	} else {
-		glDisable(GL_LIGHT1);
-	}
-	if ( !g_state[G_DEATH_ZONE] && g_state[G_HAS_CANDLE] && g_state[G_WITH_CANDLE] && g_state[G_PLAYER_LIGHT_ON] ) {
-		glEnable(GL_LIGHT3);
-	} else {
-		glDisable(GL_LIGHT3);
-	}
-	if ( g_state[G_PARTY_LIGHT_ON] ) {
-		glEnable(GL_LIGHT4);
-	} else {
-		glDisable(GL_LIGHT4);
+	if (0) {
+		if ( g_state[G_HAS_FLASH_LIGHT] && g_state[G_WITH_FLASH_LIGHT] && g_state[G_PLAYER_LIGHT_ON] ) {
+			glEnable(GL_LIGHT1);
+		} else {
+			glDisable(GL_LIGHT1);
+		}
+		if ( !g_state[G_DEATH_ZONE] && g_state[G_HAS_CANDLE] && g_state[G_WITH_CANDLE] && g_state[G_PLAYER_LIGHT_ON] ) {
+			glEnable(GL_LIGHT3);
+		} else {
+			glDisable(GL_LIGHT3);
+		}
+		if ( g_state[G_PARTY_LIGHT_ON] ) {
+			glEnable(GL_LIGHT4);
+		} else {
+			glDisable(GL_LIGHT4);
+		}
 	}
 	
 	// DEADZONE HAS RED FOG
@@ -242,8 +233,10 @@ void display() {
     float vision_decay_amount = (g_player_stress_level/10.0)*(1.0 + 0.2*sin(2*PI*t));
 	float alpha = 0.25*(1 - exp(-(g_player_stress_level/3.0)*(g_player_stress_level/3.0)));
 
+	/**** THIS SECTION IS SCREEN SPACE EFFECTS -- ORTHO *****/
+
 	// Noise in the vision
-	if (1) {
+	if (0) {
 		glPushMatrix();
 		glLoadIdentity();
 			glDisable(GL_LIGHTING);
@@ -267,7 +260,7 @@ void display() {
 	}
 
     //Vision perturbations in relation to fear level
-	if (1) {
+	if (0) {
 		glPushMatrix();
 		glLoadIdentity();
 			glScalef(0.134, 0.092, 1.0);
@@ -289,33 +282,33 @@ void display() {
 	}
 
     // Adaptive night vision 
-    if ( !g_state[G_PLAYER_LIGHT_ON] ) {
-    	GLfloat dhg[3] = {0.13, 0.13, 0.13};
-	    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, dhg);
-	    glColor4f(0.0, 0.0, 0.0, g_vision_adapt_factor);
-       	glBlendFunc(GL_ONE, GL_SRC_ALPHA);
+    // if ( !g_state[G_PLAYER_LIGHT_ON] ) {
+    // 	GLfloat dhg[3] = {0.13, 0.13, 0.13};
+	//     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, dhg);
+	//     glColor4f(0.0, 0.0, 0.0, g_vision_adapt_factor);
+    //    	glBlendFunc(GL_ONE, GL_SRC_ALPHA);
 
-        if ( !just_turned_off_lights ) {
-            just_turned_off_lights = true;
-            a = t; b = 0.0;
-        }
-        b = t - a; g_vision_adapt_factor = 1.0 - exp(-0.5*b*b);
-        if ( g_vision_adapt_factor > 0.9991 ) g_vision_adapt_factor = 1.0;
+    //     if ( !just_turned_off_lights ) {
+    //         just_turned_off_lights = true;
+    //         a = t; b = 0.0;
+    //     }
+    //     b = t - a; g_vision_adapt_factor = 1.0 - exp(-0.5*b*b);
+    //     if ( g_vision_adapt_factor > 0.9991 ) g_vision_adapt_factor = 1.0;
 
-    } else {
-	    glColor4f(0.8, 0.89, 0.5, g_vision_adapt_factor);
-       	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // } else {
+	//     glColor4f(0.8, 0.89, 0.5, g_vision_adapt_factor);
+    //    	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    	if ( just_turned_off_lights ) {
-            just_turned_off_lights = false;
-            a = t; b = 0.0;
-        }
-        b = t - a; g_vision_adapt_factor = exp(-12*b*b) * 0.8;
-        if ( g_vision_adapt_factor < 0.0001 ) g_vision_adapt_factor = 0.0;
-    }
+    // 	if ( just_turned_off_lights ) {
+    //         just_turned_off_lights = false;
+    //         a = t; b = 0.0;
+    //     }
+    //     b = t - a; g_vision_adapt_factor = exp(-12*b*b) * 0.8;
+    //     if ( g_vision_adapt_factor < 0.0001 ) g_vision_adapt_factor = 0.0;
+    // }
 
     // Vision adapt
-	if (1) {
+	if (0) {
 		glPushMatrix();
 			glLoadIdentity();
 			glDisable(GL_LIGHTING);
@@ -337,7 +330,7 @@ void display() {
 	}
 
     // High contrast effect
-	if (1) {
+	if (0) {
 		glPushMatrix();
 		glLoadIdentity();
 			glDisable(GL_LIGHTING);
@@ -358,5 +351,16 @@ void display() {
 			glEnd();
 			glEnable(GL_LIGHTING);
 		glPopMatrix();
+	}
+
+	// show wireframe?
+	if ( g_state[G_SHOW_WIREFRAME] ) {
+		glBlendFunc(GL_ONE, GL_ONE);
+		glCallList(GL_LIST_ID_WIREFRAME);
+		glBlendFunc(GL_ONE, GL_ZERO);
+	} else {
+		glBlendFunc(GL_ONE, GL_ZERO);
+		glCallList(GL_LIST_ID_MAP);
+		glBlendFunc(GL_ONE, GL_ZERO);
 	}
 }

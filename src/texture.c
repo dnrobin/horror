@@ -9,15 +9,19 @@ int r_create_texture_buf(texture_t *texture, int w, int h, int n, const unsigned
 
     glBindTexture(GL_TEXTURE_2D, texture->gl_handle);
 
+    printf("texture {%d}:\n", texture->gl_handle);
+    printf("\t w:%d h:%d\n", w, h);
+    printf("\t channels:%d\n\n", n);
+
     glTexImage2D(GL_TEXTURE_2D, 
-            0, 		        // lod
-            n, 				// number of colors
-            w, 		    	// buffer width in pixels
-            h, 				// buffer height in pixels
-            0, 				// border stuff ignored
-            (n > 3 ? GL_RGB : GL_RGBA), // color format
+            0, 		                    // lod
+            n, 				            // number of colors
+            w, 		    	            // buffer width in pixels
+            h, 				            // buffer height in pixels
+            0, 				            // border stuff ignored
+            GL_RGBA,                    // color format
             GL_UNSIGNED_BYTE, 	        // color encoding
-            buf);			// pointer to the image buffer
+            buf);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

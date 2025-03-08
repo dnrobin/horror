@@ -14,9 +14,16 @@
 #define KWHT  "\x1B[37m"
 
 #define __LOG(fp,fmt,...) fprintf(fp, fmt "\n", ## __VA_ARGS__)
+
+#define LOG_ERR(fmt,...) __LOG(stderr,KRED fmt KNRM, ## __VA_ARGS__)
+
+
+
 #define INFO(fmt,...) __LOG(stdout,KGRN fmt KNRM, ## __VA_ARGS__)
 #define ERROR(fmt,...) __LOG(stderr,KRED fmt KNRM, ## __VA_ARGS__)
 #define WARN(fmt,...) __LOG(stderr,KYEL fmt KNRM, ## __VA_ARGS__)
+
+
 
 #define ERROR_RET(fmt,...) do {\
 	ERROR(fmt, ## __VA_ARGS__);\

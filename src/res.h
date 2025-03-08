@@ -58,7 +58,7 @@ map_asset_t *get_asset(int id);
 // map_asset_t *get_asset(const char *name);
 
 
-
+void _debug_print_asset_list();
 
 
 

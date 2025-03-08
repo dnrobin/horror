@@ -26,12 +26,14 @@ static void unload_map()
 {
 	for (int i = 0; i < map_shaders_count; ++i) {
 		// r_delete_shader(&map_shaders[i]);
-		// ???
 	}
 }
 
 static void load_map()
 {
+	g_timers = array();
+	g_triggers = array();
+
 	#ifdef __DEBUG
 		printf(KMAG "\n== Loading assets ==\n" KNRM);
 	#endif
@@ -45,7 +47,7 @@ static void load_map()
 	#endif
 
 	for (int i = 0; i < map_shaders_count; ++i) {
-		// f_load_map_shader_file(&map_shaders[i]);
+		f_load_map_shader_file(&map_shaders[i]);
 	}
 	
 	#ifdef __DEBUG
@@ -55,6 +57,15 @@ static void load_map()
 	// create sound emitters from loaded audio buffers
 	for (int i = 0; i < map_sound_emitters_count; ++i) {
 		s_create_sound_emitter(&map_sound_emitters[i]);
+	}
+
+	#ifdef __DEBUG
+		printf("\n-- Creating triggers...\n");
+	#endif
+
+	for (int n = 0; n < triggers_count; n ++ ) {
+		t_trigger *trig = &triggers[n];
+		addTrigger(trig->position, trig->action, trig->retrigger, trig->retrigger_interval);
 	}
 	
 	#ifdef __DEBUG
@@ -67,24 +78,25 @@ static void load_map()
 
 void init()
 {
-	g_timers = array();
-	g_triggers = array();
+	g_state[G_DEBUG_CAMERA] = true;
 
 	load_map();
+
+	// _debug_print_asset_list();
+
+	/*** MOVE THIS */
+	uint prog = ((shader_t*)get_asset(100)->obj)->gl_handle;
+	glUseProgram(prog);
+	glUniform1i(glGetUniformLocation(prog, "tex_albedo"), 0);
+	glUniform1i(glGetUniformLocation(prog, "tex_normal"), 1);
+	glUniform1i(glGetUniformLocation(prog, "tex_roughness"), 2);
+	/*** MOVE THIS */
 	
 	#ifdef __DEBUG
 		printf(KMAG "\n== Initializing game ==\n" KNRM);
 	#endif
 
 	c_init_controls();
-	
-	// load triggers
-	int n;
-	t_trigger trig;
-	for ( n = 0; n < triggers_count; n ++ ) {
-		trig = (t_trigger)triggers[n];
-		addTrigger(trig.position, trig.action, trig.retrigger, trig.retrigger_interval);
-	}
 	
 	float start_x = 0;
 	float start_z = 0;
@@ -96,6 +108,9 @@ void init()
 	g_camera_physics_model.vel = vec3(0, 0, 0);
 	g_camera_physics_model.accel = vec3(0.0, -10.0, 0.0);
 	
+	g_camera->look = (vec3_t){ -1, 0, 0 };
+	g_camera->up = (vec3_t){ 0, 1, 0 };
+	c_camera_update_referential(g_camera);
 	c_camera_set_pos( g_camera, start_x, -0.2, start_z );
 	c_camera_set_rot( g_camera, 0.0, 0.0, 0.0 );
 	

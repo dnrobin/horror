@@ -4,30 +4,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int f_read_text_file(const char *filename, char **data, size_t *len)
+int f_read_text_file(const char *filename, const char **text, int *len)
 {
-	FILE *fp = fopen(filename, "r");
+    FILE *fp = fopen(filename, "r");
 
-	if (!fp) {
-		FATAL_RET("Error loading file '%s'!\n", filename);
-	}
-	
+    if (fp == NULL) {
+        LOG_ERR("failed to load file '%s' not found.", filename);
+        return 1;
+    }
+
     fseek(fp, 0, SEEK_END);
-    size_t n = ftell(fp);
+    size_t size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    char *p = (char*)calloc(1, n + 1);
+    char *buf = (char*)calloc(1, size);
 
-    if (!p) {
-        FATAL_RET("Error allocating memory for file '%s'!\n", filename);
+    if (buf == NULL) {
+        LOG_ERR("failed to load file '%s' memory error.", filename);
+        fclose(fp);
+        return 1;
     }
 
-    if (fread(p, n, 1, fp) == 0) {
-        FATAL_RET("Failed to read text file '%s'!\n", filename);
+    if (fread(buf, size, 1, fp) == 0) {
+        LOG_ERR("failed to load file '%s' reading file.", filename);
+        fclose(fp);
+        return 1;
     }
-    
-    *data = p;
-    *len = n;
+
+    *text = buf;
+    *len = size;
 
     fclose(fp);
 
