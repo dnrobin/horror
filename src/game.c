@@ -49,6 +49,10 @@ static void load_map()
 	for (int i = 0; i < map_shaders_count; ++i) {
 		f_load_map_shader_file(&map_shaders[i]);
 	}
+
+	// TEMP!!!!!!!!!!!!!!!!!!!!!!
+	g_main_shader_program = 3;
+	// TEMP!!!!!!!!!!!!!!!!!!!!!!
 	
 	#ifdef __DEBUG
 		printf("\n-- Creating sound emitters...\n");
@@ -73,24 +77,20 @@ static void load_map()
 	#endif
 	
 	// Load the map from file
-	loadMap("maps/map1.map");
+	#ifdef USE_MODERN_PIPELINE
+		f_load_map_json("maps/map0.json");
+	#else
+		map_load("maps/map1.map");
+	#endif	
 }
 
-void init()
+void game_code_init()
 {
 	g_state[G_DEBUG_CAMERA] = true;
 
 	load_map();
 
 	// _debug_print_asset_list();
-
-	/*** MOVE THIS */
-	uint prog = ((shader_t*)get_asset(100)->obj)->gl_handle;
-	glUseProgram(prog);
-	glUniform1i(glGetUniformLocation(prog, "tex_albedo"), 0);
-	glUniform1i(glGetUniformLocation(prog, "tex_normal"), 1);
-	glUniform1i(glGetUniformLocation(prog, "tex_roughness"), 2);
-	/*** MOVE THIS */
 	
 	#ifdef __DEBUG
 		printf(KMAG "\n== Initializing game ==\n" KNRM);
@@ -102,17 +102,18 @@ void init()
 	float start_z = 0;
 	
 	/* camera physics */
+	g_camera->zfar = 0.1;
+	g_camera->zfar = 10;
+	// g_camera->yfov	// set at update to match player model
+	cam_reset_orientation(g_camera);
 	g_camera_collision_model.radius = 0.39;
 	g_camera_physics_model.mass = 1.0;
-	g_camera_physics_model.cur_pos = vec3(start_x, -0.3, start_z);
-	g_camera_physics_model.vel = vec3(0, 0, 0);
-	g_camera_physics_model.accel = vec3(0.0, -10.0, 0.0);
+	vec3(g_camera_physics_model.cur_pos, start_x, -0.3, start_z);
+	vec3(g_camera_physics_model.vel, 0, 0, 0);
+	vec3(g_camera_physics_model.accel, 0.0, -10.0, 0.0);
 	
-	g_camera->look = (vec3_t){ -1, 0, 0 };
-	g_camera->up = (vec3_t){ 0, 1, 0 };
-	c_camera_update_referential(g_camera);
-	c_camera_set_pos( g_camera, start_x, -0.2, start_z );
-	c_camera_set_rot( g_camera, 0.0, 0.0, 0.0 );
+	// g_camera->rotation_offset = (vec3_t){ 1.3, -.1, 0 };
+	cam_move_to(g_camera, (vec3_t){start_x, -0.2, start_z});
 	
 	/* moving speeds */
 	g_player_crouch_speed = 0.56;	 // units/sec
@@ -124,7 +125,7 @@ void init()
 	for(int i = 0; i < 256; i++) g_state[i] = false;
 	
 	/* controls init */
-	g_mouse_sensitivity = 2.5;
+	g_mouse_sensitivity = 1.5;
 	g_mouse_invert_y = false;
 	
 	/* stress level */
@@ -146,13 +147,9 @@ void init()
 	g_state[G_PHY_CLIPPING] = true;
 	
 	g_state[G_STATE_ACTIVE] = true;
-
-	// REMOVE ME!!!!! ////////
-	MY_SUPER_FLAG = false;
-	//////////////////////////
 }
 
-void shutdown()
+void game_code_shutdown()
 {
 	#ifdef __DEBUG
 		printf(KMAG "\n== Shutting down ==\n" KNRM);
@@ -171,30 +168,37 @@ static void move_player()
 	if ( g_state[G_PLAYER_MOVING] && !g_state[G_PLAYER_PARALIZED] ) {
 
 		if ( g_state[G_MOVING_FORWARD] ) {
-			if ( !g_state[G_PHY_CLIPPING] ) {
-				c_camera_move_forward(g_camera, distance);
-			} else {
-				c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->look.x, 0, g_camera->look.z)), distance));
-			}
+			cam_move_forward(g_camera, distance);
+			// if ( !g_state[G_PHY_CLIPPING] ) {
+			// 	cam_move_forward(g_camera, distance);
+			// } else {
+			// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
+			// 	vec3_normalize(v, v);
+			// 	vec3_scale(v, v, distance);
+			// 	cam_move_by(g_camera, v);
+			// }
 		}
 		if ( g_state[G_MOVING_BACKWARD] ) {
-			if ( !g_state[G_PHY_CLIPPING] ) {
-				c_camera_move_backward(g_camera, distance);
-			} else {
-				c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->look.x, 0, g_camera->look.z)), -distance));
-			}
+			cam_move_backward(g_camera, distance);
+			// if ( !g_state[G_PHY_CLIPPING] ) {
+			// 	cam_move_backward(g_camera, distance);
+			// } else {
+			// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
+			// 	vec3_normalize(v, v);
+			// 	vec3_scale(v, v, -distance);
+			// 	cam_move_by(g_camera, v);
+			// }
 		}
 		if ( g_state[G_MOVING_LEFT] ) {
-			c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->right.x, 0, g_camera->right.z)), -distance));
+			cam_move_left(g_camera, distance);
 		}
 		if ( g_state[G_MOVING_RIGHT] ) {
-			c_camera_move(g_camera, vec3_scale(vec3_normalize(vec3(g_camera->right.x, 0, g_camera->right.z)), distance));
+			cam_move_right(g_camera, distance);
 		}
 	}
 }
 
 typedef enum {
-
 	PLAYER_JUST_SCARED,
 	PLAYER_REACTING_TO_SCARE,
 	PLAYER_
@@ -208,6 +212,10 @@ typedef enum {
 
 void animate_player()
 {
+	if (GAME_SKIP_ANIMATIONS) {
+		return;
+	}
+
 	static float last_stress_level = 0.0, stress_increase = 0.0;		// for animation speeds
 
     static bool walked_step = false;
@@ -295,8 +303,8 @@ void animate_player()
 			g_state[G_PLAYER_LOOK_FRANTIC] = false;
 			just_got_frantic = false;
 		}
-		c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
-		c_camera_set_rot_offset(g_camera, looking_v, looking_h, 0.0);
+		// c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+		// c_camera_set_rot_offset(g_camera, looking_v, looking_h, 0.0);
 		g_state[G_PLAYER_MOVING] = false;
 	}
 
@@ -304,7 +312,7 @@ void animate_player()
 	else if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
 		if ( !just_began_looking_behind ) {
 			just_began_looking_behind = true;
-			a = 0.0; c = m_rand()%10 > 5 ? -1 : 1;
+			a = 0.0; c = m_rand()*10 > 5 ? -1 : 1;
 		}
 		a += dt; s = 1.8*(0.1 + g_player_stress_level/20.0); s = s < 0.3 ? 0.3 : s;
 		looking_h = 3.5*m_sin(2.0 * m_sin(s*a) - 0.2*m_sin(s*3.4*a) - 0.1*m_sin(s*10*a));
@@ -313,12 +321,12 @@ void animate_player()
 			g_state[G_PLAYER_LOOK_BEHIND] = false;
 			look_behind_ready = true;
 			just_began_looking_behind = false;
-			c_camera_set_rot(g_camera, looking_v, c*looking_h, 0.0);
-			c_camera_set_rot_offset(g_camera, 0.0, 0.0, 0.0);
+			cam_set_angles(g_camera, looking_v, c*looking_h, 0.0);
+			// c_camera_set_rot_offset(g_camera, 0.0, 0.0, 0.0);
 		}
 		else {
-			c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
-			c_camera_set_rot_offset(g_camera, looking_v, c*looking_h, 0.0);
+			// c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+			// c_camera_set_rot_offset(g_camera, looking_v, c*looking_h, 0.0);
 			g_state[G_PLAYER_MOVING] = false;
 		}
 	}
@@ -326,8 +334,8 @@ void animate_player()
 	else {
 		
 		/* player idle animation */
-		c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
-		c_camera_set_rot_offset(g_camera, vertical_stress_influence + 0.01 * (1.0 - m_sin(PI*t)), looking_influence + horizontal_stress_influence, 0);
+		// c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y, 0.0);
+		// c_camera_set_rot_offset(g_camera, vertical_stress_influence + 0.01 * (1.0 - m_sin(M_PI*t)), looking_influence + horizontal_stress_influence, 0);
 	}
 
 	// FIX ME: WHENEVER IDLE FOR A SEC HE SETS UP A TIMER!
@@ -335,7 +343,7 @@ void animate_player()
 		
 		/* andomly make player look behind */
 		if ( look_behind_ready ) {
-			add_timer(1000*(30.0+m_rand()%70),&trigger_player_look_behind);
+			add_timer(1000*(30.0+m_rand()*70),&trigger_player_look_behind);
 			look_behind_ready = false;
 		}
 	}
@@ -343,13 +351,13 @@ void animate_player()
 	if ( g_state[G_PLAYER_MOVING] && !g_state[G_PLAYER_PARALIZED] ) {
 		
 		/* walking animation */
-		float o = 6.0 * (0.5 - m_cos(4*PI*t*g_walking_animation_rate)); o = o < 0 ? o : 0;
+		float o = 6.0 * (0.5 - m_cos(4*M_PI*t*g_walking_animation_rate)); o = o < 0 ? o : 0;
 		
-		c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y + 0.008 * o + 0.01 * (1.0 - m_sin(3*PI*g_walking_animation_rate*t)), -0.003*o);
-		c_camera_set_rot_offset(g_camera,
-				vertical_stress_influence + 0.005 * o - 0.02 * m_sin(2*PI*g_walking_animation_rate*t),
-				looking_influence + horizontal_stress_influence - 0.03 * m_sin(2*PI*g_walking_animation_rate*t) + 0.005 * (1.0 - m_sin(3*PI*g_walking_animation_rate*t)),
-				0);
+		// c_camera_set_pos_offset(g_camera, 0.0, player_croutch_y + 0.008 * o + 0.01 * (1.0 - m_sin(3*M_PI*g_walking_animation_rate*t)), -0.003*o);
+		// c_camera_set_rot_offset(g_camera,
+		// 		vertical_stress_influence + 0.005 * o - 0.02 * m_sin(2*M_PI*g_walking_animation_rate*t),
+		// 		looking_influence + horizontal_stress_influence - 0.03 * m_sin(2*M_PI*g_walking_animation_rate*t) + 0.005 * (1.0 - m_sin(3*M_PI*g_walking_animation_rate*t)),
+		// 		0);
 				
 		if ( waiting_to_move ) {
 			waiting_to_move = false;
@@ -383,55 +391,59 @@ void animate_player()
 	last_stress_level = g_player_stress_level;
 }
 
-void update()
+void game_code_update()
 {
 	c_update_controls();
 
 	move_player();
 
 	// stop here if debugging
-	if ( GL_DEBUG_GEOMETRY_MODE ) {
-		return;
-	}
-	
-	update_timers();
-	
-	update_stress_response();
+	if (!GL_DEBUG_GEOMETRY_MODE && !GAME_SKIP_COLLISIONS) {
+		
+		update_timers();
+		
+		update_stress_response();
 
-	s_sound_update_listener(&g_camera->position, &g_camera->look, &g_camera->up);
+		// TODO: move to more appropriate place
+		g_camera->yfov = g_player_fov;
 
-	if ( g_state[G_PHY_CLIPPING] )
-	{
+		s_sound_update_listener(&g_camera->eye, &g_camera->look, &g_camera->up);
 
-		// only animate if in player state
-		animate_player();
-
-		/* do some basic physics */
-		if ( !g_state[G_DEBUG_PHYSICS] )
+		if ( g_state[G_PHY_CLIPPING] )
 		{
-			vec3_cpy(&g_camera_physics_model.cur_pos,&g_camera->position);
-		
-			/* NO PHYSICS YET, CHECK BACK SOON! */
-		
-			/* check collisions */
-			vec3_cpy(&g_camera_collision_model.center,&g_camera_physics_model.cur_pos);
-			bool collided = check_collisions(&g_camera_collision_model, g_collisions_count, g_collisions );
-			vec3_cpy(&g_camera_physics_model.cur_pos,&g_camera_collision_model.center);
-		
-			// update camera position
-			vec3_cpy(&g_camera->position,&g_camera_physics_model.cur_pos);
-		}
+			// only animate if in player state
+			animate_player();
 
-		/* check "collision" with triggers */
-		int i;
-		t_trigger* trigger;
-		if ( g_triggers->count > 0 )
-		{
-			array_set_internal_position(g_triggers, 0);
-			for ( i = 0; i < g_triggers->count; i ++ ) {
-				trigger = array_next(g_triggers);
-				if ( vec3_norm(vec3_sub(g_camera->position, trigger->position)) < 0.7 ) {
-					fireTrigger(trigger);
+			/* do some basic physics */
+			if ( !g_state[G_DEBUG_PHYSICS] )
+			{
+				vec3_copy(g_camera_physics_model.cur_pos, g_camera->eye);
+			
+				/* NO PHYSICS YET, CHECK BACK SOON! */
+			
+				/* check collisions */
+				vec3_copy(g_camera_collision_model.center, g_camera_physics_model.cur_pos);
+				bool collided = check_collisions(&g_camera_collision_model, g_collisions_count, g_collisions );
+				vec3_copy(g_camera_physics_model.cur_pos, g_camera_collision_model.center);
+			
+				// update camera position
+				vec3_copy(g_camera->eye, g_camera_physics_model.cur_pos);
+			}
+
+			/* check "collision" with triggers */
+			if (!GAME_SKIP_TRIGGERS) {
+				t_trigger* trigger;
+				if ( g_triggers->count > 0 )
+				{
+					array_set_internal_position(g_triggers, 0);
+					for (int i = 0; i < g_triggers->count; i ++ ) {
+						trigger = array_next(g_triggers);
+						vec3_t v;
+						vec3_sub(v, g_camera->eye, trigger->position);
+						if ( vec3_length(v) < 0.7 ) {
+							fireTrigger(trigger);
+						}
+					}
 				}
 			}
 		}

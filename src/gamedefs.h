@@ -2,9 +2,12 @@
 #define __MAZE_GAME_DEFS_H__
 
 /* include debug controls and variables */
-#define DEBUG_GAME
+#define DEBUG_GAME 1
 
-bool MY_SUPER_FLAG;
+/* some flags to turn on/off engine systems */
+#define GAME_SKIP_TRIGGERS      1
+#define GAME_SKIP_ANIMATIONS    1
+#define GAME_SKIP_COLLISIONS    1
 
 /* Texture id's shared globally --- CRAP MUST FIX */
 #define G_TEX_WALL_DIFFUSE_ID 100

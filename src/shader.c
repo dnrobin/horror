@@ -2,7 +2,6 @@
 #include "shader.h"
 
 #include "file.h"
-#include "glad.h"
 
 #include <stdio.h>
 #include <string.h>

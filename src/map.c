@@ -9,11 +9,184 @@
 #include "collision.h"
 #include "texture.h"
 
+#include "r_mesh.h"
+
 #include "parson.h"
-#include "glad.h"
 
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef USE_MODERN_PIPELINE
+
+int f_load_map_json(const char* filename, mesh_t *map)
+{
+	JSON_Value* JSON;
+	
+	#ifdef __DEBUG
+		printf("-- loading map from file %s\n",filename);
+	#endif
+	
+	if( (JSON = json_parse_file(filename)) == NULL ) {
+		printf(KRED "Error: file not found \"%s\"\n" KNRM,filename);
+		return 0;
+	}
+
+	JSON = json_value_get_object(JSON);
+
+	JSON_Array* faces;
+	if( (faces = json_object_get_array(json_object_get_object(JSON, "geometry"), "faces")) == NULL ) {
+		printf(KRED "Error: geometry information missing\n" KNRM);
+		return 0;
+	}
+	
+	#ifdef __DEBUG
+		printf("-- building geometry\n");
+	#endif
+	
+	for ( int f = 0; f < json_array_get_count(faces); f ++ )
+	{
+		JSON_Object* face = json_array_get_object(faces, f);
+		JSON_Array*  vertices = json_object_get_array(face, "vertices");
+		JSON_Array*  normal = json_object_get_array(face, "normal");
+		int nverts = json_array_get_count(vertices);
+
+		// json_array_get_number(normal, 0)
+		// json_array_get_number(normal, 1)
+		// json_array_get_number(normal, 2)
+
+		for ( int v = 0; v < nverts; v ++ )
+		{
+			JSON_Object* vertex = json_array_get_object(vertices, v);
+			JSON_Array* color = json_object_get_array(vertex, "color");
+			JSON_Array* texcoords = json_object_get_array(vertex, "texcoords");
+			JSON_Array* position = json_object_get_array(vertex, "position");
+
+			// json_array_get_number(color, 0);
+			// json_array_get_number(color, 1);
+			// json_array_get_number(color, 2);
+			// json_array_get_number(color, 3);
+			
+			// json_array_get_number(texcoords, 0);
+			// json_array_get_number(texcoords, 1);
+			
+			// json_array_get_number(position,0);
+			// json_array_get_number(position,1);
+			// json_array_get_number(position,2);
+		}
+	}
+
+	json_value_free(JSON);
+
+	return 0;
+}
+
+
+
+#else
+
+t_face4* convertFace4( const t__face* f ) {
+	int i;
+	t_face4* face;
+	face = malloc(sizeof(t_face4));
+	
+	for(i=0; i<4; i++) {
+		vec3_copy(face->vertices[i], f->verts[i]);
+		vec3_copy(face->texcoords[i], f->tcoords[i]);
+		vec4_copy(&face->colors[i].r, &f->colors[i].r);
+	}
+	vec3_copy(face->normal, f->normal);
+	
+	return face;
+}
+
+// void subdivision4(const t_face4* face, const int _u, const int _v, const int ndivs, int rec) {
+	
+// 	int i, j;
+	
+// 	vec3_t v1 = face->vertices[0];
+// 	vec3_t v2 = face->vertices[1];
+// 	vec3_t v3 = face->vertices[2];
+// 	vec3_t v4 = face->vertices[3];
+	
+// 	// calculate new face vertices
+// 	vec3_t v[] = {
+// 		vec3_add( vec3_scale( vec3_sub( v2, v1 ), 0.5 ), v1 ),	// v[0]
+// 		vec3_add( vec3_scale( vec3_sub( v3, v2 ), 0.5 ), v2 ),	// v[1]
+// 		vec3_add( vec3_scale( vec3_sub( v4, v3 ), 0.5 ), v3 ),	// v[2]
+// 		vec3_add( vec3_scale( vec3_sub( v1, v4 ), 0.5 ), v4 ),	// v[3]
+// 		vec3_add( vec3_scale( vec3_sub( v3, v1 ), 0.5 ), v1 )		// v[4]
+// 	};
+	
+// 	// create new faces
+// 	int ru = _u*(int)m_pow(2, (rec+1))/ndivs, rv = _v*(int)m_pow(2, (rec+1))/ndivs;
+// 	t_face4 faces[4];
+// 	faces[0] = *face;
+// 	faces[0].vertices[0] = v1;
+// 	faces[0].vertices[1] = v[0];
+// 	faces[0].vertices[2] = v[4];
+// 	faces[0].vertices[3] = v[3];
+// 	faces[0].texcoords[0].x += ru; faces[0].texcoords[0].y += rv;
+// 	faces[0].texcoords[1].x += ru; faces[0].texcoords[1].y += rv;
+// 	faces[0].texcoords[2].x += ru; faces[0].texcoords[2].y += rv;
+// 	faces[0].texcoords[3].x += ru; faces[0].texcoords[3].y += rv;
+
+// 	faces[1] = *face;
+// 	faces[1].vertices[0] = v[0];
+// 	faces[1].vertices[1] = v2;
+// 	faces[1].vertices[2] = v[1];
+// 	faces[1].vertices[3] = v[4];
+// 	faces[1].texcoords[0].x += 1 + ru; faces[1].texcoords[0].y += rv;
+// 	faces[1].texcoords[1].x += 1 + ru; faces[1].texcoords[1].y += rv;
+// 	faces[1].texcoords[2].x += 1 + ru; faces[1].texcoords[2].y += rv;
+// 	faces[1].texcoords[3].x += 1 + ru; faces[1].texcoords[3].y += rv;
+
+// 	faces[2] = *face;
+// 	faces[2].vertices[0] = v[4];
+// 	faces[2].vertices[1] = v[1];
+// 	faces[2].vertices[2] = v3;
+// 	faces[2].vertices[3] = v[2];
+// 	faces[2].texcoords[0].x += 1 + ru; faces[2].texcoords[0].y += 1 + rv;
+// 	faces[2].texcoords[1].x += 1 + ru; faces[2].texcoords[1].y += 1 + rv;
+// 	faces[2].texcoords[2].x += 1 + ru; faces[2].texcoords[2].y += 1 + rv;
+// 	faces[2].texcoords[3].x += 1 + ru; faces[2].texcoords[3].y += 1 + rv;
+
+// 	faces[3] = *face;
+// 	faces[3].vertices[0] = v[3];
+// 	faces[3].vertices[1] = v[4];
+// 	faces[3].vertices[2] = v[2];
+// 	faces[3].vertices[3] = v4;
+// 	faces[3].texcoords[0].x += ru; faces[3].texcoords[0].y += 1 + rv;
+// 	faces[3].texcoords[1].x += ru; faces[3].texcoords[1].y += 1 + rv;
+// 	faces[3].texcoords[2].x += ru; faces[3].texcoords[2].y += 1 + rv;
+// 	faces[3].texcoords[3].x += ru; faces[3].texcoords[3].y += 1 + rv;
+
+// 	if ( rec > 1 ) {
+// 		--rec;
+// 		subdivision4(&faces[0], 0, 0, ndivs, rec);
+// 		subdivision4(&faces[1], 1, 0, ndivs, rec);
+// 		subdivision4(&faces[2], 1, 1, ndivs, rec);
+// 		subdivision4(&faces[3], 0, 1, ndivs, rec);
+// 	} else {
+
+// 		float WALL_HEIGHT_OFFSET = 0.2;
+
+// 		for ( i = 0; i < 4; i ++ ) {
+			
+// 			glNormal3f(faces[i].normal.x, faces[i].normal.y, faces[i].normal.z);
+
+// 			glBegin(GL_QUADS);
+// 			for ( j = 0; j < 4; j ++ ) {
+// 				float MESSED_UP_CEILING_OFFSET = (rand()%100)*0.0008 * 1;
+// 				glColor4f(faces[i].colors[j].r,faces[i].colors[j].r,faces[i].colors[j].r, 1.0);
+// 				glTexCoord2f(faces[i].texcoords[j].x / ndivs, faces[i].texcoords[j].y / ndivs);
+// 				glVertex3f(faces[i].vertices[j].x, faces[i].vertices[j].y + (faces[i].vertices[j].y>0.4?(WALL_HEIGHT_OFFSET+MESSED_UP_CEILING_OFFSET):0), faces[i].vertices[j].z);
+// 			}
+// 			glEnd();
+
+// 		}
+// 	}
+	
+// }
 
 int loadMapJSON(const char* filename) {
 	JSON_Value* JSON;
@@ -133,85 +306,85 @@ int loadMapJSON(const char* filename) {
 	return 1;
 }
 
-int saveMap(const int mapc, const float* mapv, const char* filename ) {
+// int saveMap(const int mapc, const float* mapv, const char* filename ) {
 	
-	FILE* fp;
-	t_map_descriptor mapdesc;
-	t__face* faces;
-	int count = (int)(mapc / 3 / 6);
+// 	FILE* fp;
+// 	t_map_descriptor mapdesc;
+// 	t__face* faces;
+// 	int count = (int)(mapc / 3 / 6);
 	
-	// allocate buffer memory
-	if( (faces = (t__face*)malloc(sizeof(t__face)*count)) == NULL ) {
-		printf("Error: could not allocate memory for map!\n");
-		return 0;
-	}
+// 	// allocate buffer memory
+// 	if( (faces = (t__face*)malloc(sizeof(t__face)*count)) == NULL ) {
+// 		printf("Error: could not allocate memory for map!\n");
+// 		return 0;
+// 	}
 	
-	// compile faces to memory
-	int i, a;
-	for( i = 0; i < count; i ++ ) {
-		faces[i].type = FACE_TYPE_4;
-		for(a=0;a<4;a++) {
-			faces[i].verts[a].x = mapv[i*18+a*3+0];
-			faces[i].verts[a].y = mapv[i*18+a*3+1];
-			faces[i].verts[a].z = mapv[i*18+a*3+2];
-			faces[i].colors[a].r = mapv[i*18+4*3+0];
-			faces[i].colors[a].g = mapv[i*18+4*3+1];
-			faces[i].colors[a].b = mapv[i*18+4*3+2];
-			faces[i].colors[a].a = 	1.0;
-		}
+// 	// compile faces to memory
+// 	int i, a;
+// 	for( i = 0; i < count; i ++ ) {
+// 		faces[i].type = FACE_TYPE_4;
+// 		for(a=0;a<4;a++) {
+// 			faces[i].verts[a].x = mapv[i*18+a*3+0];
+// 			faces[i].verts[a].y = mapv[i*18+a*3+1];
+// 			faces[i].verts[a].z = mapv[i*18+a*3+2];
+// 			faces[i].colors[a].r = mapv[i*18+4*3+0];
+// 			faces[i].colors[a].g = mapv[i*18+4*3+1];
+// 			faces[i].colors[a].b = mapv[i*18+4*3+2];
+// 			faces[i].colors[a].a = 	1.0;
+// 		}
 		
-		faces[i].tcoords[0].x = 0.0;
-		faces[i].tcoords[0].y = 0.0;
-		faces[i].tcoords[1].x = 1.0;
-		faces[i].tcoords[1].y = 0.0;
-		faces[i].tcoords[2].x = 1.0;
-		faces[i].tcoords[2].y = 1.0;
-		faces[i].tcoords[3].x = 0.0;
-		faces[i].tcoords[3].y = 1.0;
+// 		faces[i].tcoords[0].x = 0.0;
+// 		faces[i].tcoords[0].y = 0.0;
+// 		faces[i].tcoords[1].x = 1.0;
+// 		faces[i].tcoords[1].y = 0.0;
+// 		faces[i].tcoords[2].x = 1.0;
+// 		faces[i].tcoords[2].y = 1.0;
+// 		faces[i].tcoords[3].x = 0.0;
+// 		faces[i].tcoords[3].y = 1.0;
 		
-		faces[i].normal.x = mapv[i*18+5*3+0];
-		faces[i].normal.y = mapv[i*18+5*3+1];
-		faces[i].normal.z = mapv[i*18+5*3+2];
+// 		faces[i].normal.x = mapv[i*18+5*3+0];
+// 		faces[i].normal.y = mapv[i*18+5*3+1];
+// 		faces[i].normal.z = mapv[i*18+5*3+2];
 		
-		if ( mapv[i*18+5*3+1] == 0.0 ) {
-			faces[i].texid = 987;
-		} else if ( mapv[i*18+5*3+1] == 1.0 ) {
-			faces[i].texid = 988;
-		} else {
-			faces[i].texid = 989;
-		}
-	}
+// 		if ( mapv[i*18+5*3+1] == 0.0 ) {
+// 			faces[i].texid = 987;
+// 		} else if ( mapv[i*18+5*3+1] == 1.0 ) {
+// 			faces[i].texid = 988;
+// 		} else {
+// 			faces[i].texid = 989;
+// 		}
+// 	}
 	
-	// open file for writing
-	if( (fp=fopen(filename, "w")) == NULL ) {
-		printf("Error: could not open file for output!\n");
-		return 0;
-	}
+// 	// open file for writing
+// 	if( (fp=fopen(filename, "w")) == NULL ) {
+// 		printf("Error: could not open file for output!\n");
+// 		return 0;
+// 	}
 	
-	// set number of faces
-	mapdesc.nb_faces = count;
+// 	// set number of faces
+// 	mapdesc.nb_faces = count;
 	
-	// write map descriptor to file
-	if( fwrite(&mapdesc, sizeof(mapdesc), 1, fp) != 1 ) {
-		printf("Error: could not write descriptor to output file!\n");
-		return 0;
-	}
+// 	// write map descriptor to file
+// 	if( fwrite(&mapdesc, sizeof(mapdesc), 1, fp) != 1 ) {
+// 		printf("Error: could not write descriptor to output file!\n");
+// 		return 0;
+// 	}
 	
-	// write faces to file
-	for ( i = 0; i < count; i ++ ) {
-		if( fwrite(&faces[i], sizeof(t__face), 1, fp) != 1 ) {
-			printf("Error: could not write data to output file!\n");
-			return 0;
-		}
-	}
+// 	// write faces to file
+// 	for ( i = 0; i < count; i ++ ) {
+// 		if( fwrite(&faces[i], sizeof(t__face), 1, fp) != 1 ) {
+// 			printf("Error: could not write data to output file!\n");
+// 			return 0;
+// 		}
+// 	}
 	
-	free(faces);
-	fclose(fp);
+// 	free(faces);
+// 	fclose(fp);
 	
-	return 1;
-}
+// 	return 1;
+// }
 
-int loadMap(const char* filename)
+int map_load(const char* filename)
 {	
 	FILE* fp;
 	char filepath[256];
@@ -290,28 +463,28 @@ int loadMap(const char* filename)
 
 		if (0) {
 			printf("\nFACE(%d) - type : %d\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",i,face->type);
-			printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0].x, face->verts[0].y, face->verts[0].z);
-			printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1].x, face->verts[1].y, face->verts[1].z);
-			printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2].x, face->verts[2].y, face->verts[2].z);
-			printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3].x, face->verts[3].y, face->verts[3].z);
-			printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0].x, face->tcoords[0].y);
-			printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1].x, face->tcoords[1].y);
-			printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2].x, face->tcoords[2].y);
-			printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3].x, face->tcoords[3].y);
+			printf("Vertex 1 : {%0.1f, %0.1f, %0.1f}\n",face->verts[0][0], face->verts[0][1], face->verts[0][2]);
+			printf("Vertex 2 : {%0.1f, %0.1f, %0.1f}\n",face->verts[1][0], face->verts[1][1], face->verts[1][2]);
+			printf("Vertex 3 : {%0.1f, %0.1f, %0.1f}\n",face->verts[2][0], face->verts[2][1], face->verts[2][2]);
+			printf("Vertex 4 : {%0.1f, %0.1f, %0.1f}\n",face->verts[3][0], face->verts[3][1], face->verts[3][2]);
+			printf("TexCoord 1 : {%0.1f, %0.1f}\n",face->tcoords[0][0], face->tcoords[0][1]);
+			printf("TexCoord 2 : {%0.1f, %0.1f}\n",face->tcoords[1][0], face->tcoords[1][1]);
+			printf("TexCoord 3 : {%0.1f, %0.1f}\n",face->tcoords[2][0], face->tcoords[2][1]);
+			printf("TexCoord 4 : {%0.1f, %0.1f}\n",face->tcoords[3][0], face->tcoords[3][1]);
 			printf("Color 1 : {%0.1f, %0.1f, %0.1f}\n",face->colors[0].r, face->colors[0].g, face->colors[0].b);
 			printf("Color 2 : {%0.1f, %0.1f, %0.1f}\n",face->colors[1].r, face->colors[1].g, face->colors[1].b);
 			printf("Color 3 : {%0.1f, %0.1f, %0.1f}\n",face->colors[2].r, face->colors[2].g, face->colors[2].b);
 			printf("Color 4 : {%0.1f, %0.1f, %0.1f}\n",face->colors[3].r, face->colors[3].g, face->colors[3].b);
-			printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal.x, face->normal.y, face->normal.z);
+			printf("Normal : {%0.1f, %0.1f, %0.1f}\n",face->normal[0], face->normal[1], face->normal[2]);
 			printf("TexId : %d\n",face->texid);
 		}
 		
 		// set collision surfaces
-		g_collisions[i].v1 = (vec3_t){ face->verts[0].x, (face->normal.y==1.0?-0.35:face->verts[0].y), face->verts[0].z };
-		g_collisions[i].v2 = (vec3_t){ face->verts[1].x, (face->normal.y==1.0?-0.35:face->verts[1].y), face->verts[1].z };
-		g_collisions[i].v3 = (vec3_t){ face->verts[2].x, (face->normal.y==1.0?-0.35:face->verts[2].y), face->verts[2].z };
-		g_collisions[i].v4 = (vec3_t){ face->verts[3].x, (face->normal.y==1.0?-0.35:face->verts[3].y), face->verts[3].z };
-		g_collisions[i].normal = (vec3_t){ face->normal.x, face->normal.y, face->normal.z };
+		vec3_copy(g_collisions[i].v1, (vec3_t){ face->verts[0][0], (face->normal[1]==1.0?-0.35:face->verts[0][1]), face->verts[0][2] });
+		vec3_copy(g_collisions[i].v2, (vec3_t){ face->verts[1][0], (face->normal[1]==1.0?-0.35:face->verts[1][1]), face->verts[1][2] });
+		vec3_copy(g_collisions[i].v3, (vec3_t){ face->verts[2][0], (face->normal[1]==1.0?-0.35:face->verts[2][1]), face->verts[2][2] });
+		vec3_copy(g_collisions[i].v4, (vec3_t){ face->verts[3][0], (face->normal[1]==1.0?-0.35:face->verts[3][1]), face->verts[3][2] });
+		vec3_copy(g_collisions[i].normal, (vec3_t){ face->normal[0], face->normal[1], face->normal[2] });
 		
 
 		glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(face->texid)->obj)->gl_handle);
@@ -326,27 +499,27 @@ int loadMap(const char* filename)
 
 		if (0) {
 		
-			subdivision4(
-				convertFace4(face), 		// face pointer
-				0, 							// group u texcoord
-				0, 							// group v texcoord
-				4,							// number of divisions per axis
-				2);							// number of recursions
+			// subdivision4(
+			// 	convertFace4(face), 		// face pointer
+			// 	0, 							// group u texcoord
+			// 	0, 							// group v texcoord
+			// 	4,							// number of divisions per axis
+			// 	2);							// number of recursions
 		}
 
 		else {
 
 
-			glNormal3f(face->normal.x, face->normal.y, face->normal.z);
+			glNormal3f(face->normal[0], face->normal[1], face->normal[2]);
 			glBegin(GL_QUADS);
 			
 			for (int j = 0; j < 4; ++j) {
-				// glTexCoord2f(face->tcoords[j].x, face->tcoords[j].y);
-				glMultiTexCoord2f(GL_TEXTURE0 + 0, face->tcoords[j].x, face->tcoords[j].y);
-				glMultiTexCoord2f(GL_TEXTURE0 + 1, face->tcoords[j].x, face->tcoords[j].y);
-				glMultiTexCoord2f(GL_TEXTURE0 + 2, face->tcoords[j].x, face->tcoords[j].y);
+				// glTexCoord2f(face->tcoords[j][0], face->tcoords[j][1]);
+				glMultiTexCoord2f(GL_TEXTURE0 + 0, face->tcoords[j][0], face->tcoords[j][1]);
+				glMultiTexCoord2f(GL_TEXTURE0 + 1, face->tcoords[j][0], face->tcoords[j][1]);
+				glMultiTexCoord2f(GL_TEXTURE0 + 2, face->tcoords[j][0], face->tcoords[j][1]);
 				glColor4f(face->colors[j].r,face->colors[j].r,face->colors[j].r, 1.0);
-				glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j].z);
+				glVertex3f(face->verts[j][0], face->verts[j][1], face->verts[j][2]);
 			}
 
 			glEnd();
@@ -354,7 +527,7 @@ int loadMap(const char* filename)
 			// glColor3f(1.0, 1.0, 1.0);
 			// glBegin(GL_LINES);
 			// for ( j = 0; j < 4; j ++ ) {
-			// 	glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j].z);
+			// 	glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j][2]);
 			// 	glVertex3f(face->verts[j].x + 0.2*face->normal.x, face->verts[j].y + 0.2*face->normal.y, face->verts[j].z + 0.2*face->normal.z);
 			// }
 			// glEnd();
@@ -366,106 +539,5 @@ int loadMap(const char* filename)
 	return 1;
 }
 
-void subdivision4(const t_face4* face, const int _u, const int _v, const int ndivs, int rec) {
-	
-	int i, j;
-	
-	vec3_t v1 = face->vertices[0];
-	vec3_t v2 = face->vertices[1];
-	vec3_t v3 = face->vertices[2];
-	vec3_t v4 = face->vertices[3];
-	
-	// calculate new face vertices
-	vec3_t v[] = {
-		vec3_add( vec3_scale( vec3_sub( v2, v1 ), 0.5 ), v1 ),	// v[0]
-		vec3_add( vec3_scale( vec3_sub( v3, v2 ), 0.5 ), v2 ),	// v[1]
-		vec3_add( vec3_scale( vec3_sub( v4, v3 ), 0.5 ), v3 ),	// v[2]
-		vec3_add( vec3_scale( vec3_sub( v1, v4 ), 0.5 ), v4 ),	// v[3]
-		vec3_add( vec3_scale( vec3_sub( v3, v1 ), 0.5 ), v1 )		// v[4]
-	};
-	
-	// create new faces
-	int ru = _u*(int)m_pow(2, (rec+1))/ndivs, rv = _v*(int)m_pow(2, (rec+1))/ndivs;
-	t_face4 faces[4];
-	faces[0] = *face;
-	faces[0].vertices[0] = v1;
-	faces[0].vertices[1] = v[0];
-	faces[0].vertices[2] = v[4];
-	faces[0].vertices[3] = v[3];
-	faces[0].texcoords[0].x += ru; faces[0].texcoords[0].y += rv;
-	faces[0].texcoords[1].x += ru; faces[0].texcoords[1].y += rv;
-	faces[0].texcoords[2].x += ru; faces[0].texcoords[2].y += rv;
-	faces[0].texcoords[3].x += ru; faces[0].texcoords[3].y += rv;
 
-	faces[1] = *face;
-	faces[1].vertices[0] = v[0];
-	faces[1].vertices[1] = v2;
-	faces[1].vertices[2] = v[1];
-	faces[1].vertices[3] = v[4];
-	faces[1].texcoords[0].x += 1 + ru; faces[1].texcoords[0].y += rv;
-	faces[1].texcoords[1].x += 1 + ru; faces[1].texcoords[1].y += rv;
-	faces[1].texcoords[2].x += 1 + ru; faces[1].texcoords[2].y += rv;
-	faces[1].texcoords[3].x += 1 + ru; faces[1].texcoords[3].y += rv;
-
-	faces[2] = *face;
-	faces[2].vertices[0] = v[4];
-	faces[2].vertices[1] = v[1];
-	faces[2].vertices[2] = v3;
-	faces[2].vertices[3] = v[2];
-	faces[2].texcoords[0].x += 1 + ru; faces[2].texcoords[0].y += 1 + rv;
-	faces[2].texcoords[1].x += 1 + ru; faces[2].texcoords[1].y += 1 + rv;
-	faces[2].texcoords[2].x += 1 + ru; faces[2].texcoords[2].y += 1 + rv;
-	faces[2].texcoords[3].x += 1 + ru; faces[2].texcoords[3].y += 1 + rv;
-
-	faces[3] = *face;
-	faces[3].vertices[0] = v[3];
-	faces[3].vertices[1] = v[4];
-	faces[3].vertices[2] = v[2];
-	faces[3].vertices[3] = v4;
-	faces[3].texcoords[0].x += ru; faces[3].texcoords[0].y += 1 + rv;
-	faces[3].texcoords[1].x += ru; faces[3].texcoords[1].y += 1 + rv;
-	faces[3].texcoords[2].x += ru; faces[3].texcoords[2].y += 1 + rv;
-	faces[3].texcoords[3].x += ru; faces[3].texcoords[3].y += 1 + rv;
-
-	if ( rec > 1 ) {
-		--rec;
-		subdivision4(&faces[0], 0, 0, ndivs, rec);
-		subdivision4(&faces[1], 1, 0, ndivs, rec);
-		subdivision4(&faces[2], 1, 1, ndivs, rec);
-		subdivision4(&faces[3], 0, 1, ndivs, rec);
-	} else {
-
-		float WALL_HEIGHT_OFFSET = 0.2;
-
-		for ( i = 0; i < 4; i ++ ) {
-			
-			glNormal3f(faces[i].normal.x, faces[i].normal.y, faces[i].normal.z);
-
-			glBegin(GL_QUADS);
-			for ( j = 0; j < 4; j ++ ) {
-				float MESSED_UP_CEILING_OFFSET = (rand()%100)*0.0008 * 1;
-				glColor4f(faces[i].colors[j].r,faces[i].colors[j].r,faces[i].colors[j].r, 1.0);
-				glTexCoord2f(faces[i].texcoords[j].x / ndivs, faces[i].texcoords[j].y / ndivs);
-				glVertex3f(faces[i].vertices[j].x, faces[i].vertices[j].y + (faces[i].vertices[j].y>0.4?(WALL_HEIGHT_OFFSET+MESSED_UP_CEILING_OFFSET):0), faces[i].vertices[j].z);
-			}
-			glEnd();
-
-		}
-	}
-	
-}
-
-t_face4* convertFace4( const t__face* f ) {
-	int i;
-	t_face4* face;
-	face = malloc(sizeof(t_face4));
-	
-	for(i=0; i<4; i++) {
-	face->vertices[i] = f->verts[i];
-	face->texcoords[i] = f->tcoords[i];
-	face->colors[i] = f->colors[i];
-	}
-	face->normal = f->normal;
-	
-	return face;
-}
+#endif

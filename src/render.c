@@ -3,14 +3,15 @@
 
 // OOPS..........
 #include "gamedefs.h"
+#include "map_definitions.inc"
 #include "game.h"
 #include "timing.h"
+#include "res.h"
 #include "map.h"
 
-#include <stdlib.h>
-#include <math.h>
+#include "shader.h"
 
-#include "glad.h"
+#include <stdlib.h>
 
 #include <OpenGL/glu.h>
 
@@ -19,20 +20,22 @@ void init_render()
     
 }
 
-void display() {
-
-	//static float flare = 0.0;
+void display() 
+{
+	static float flare = 0.0;
 	static float t = 0.0;
 	t += getEllapsedSeconds(TIMER_LIGHT_ANIMATION);
-	float twirl1 = sin(1*PI*t);
-	float twirl2 = sin(2*PI*t);
-	float twirl3 = sin(3*PI*t);
-	float flare = 0.1 * ( 7.0 + sin(.1*PI*t) + sin(3*PI*twirl1) + sin(.4*PI*t) + 2*sin(.7*PI*twirl3/3)*sin(.3*PI*t) );
+	float twirl1 = sin(1*M_PI*t);
+	float twirl2 = sin(2*M_PI*t);
+	float twirl3 = sin(3*M_PI*t);
+	flare = 0.1 * ( 7.0 + sin(.1*M_PI*t) + sin(3*M_PI*twirl1) + sin(.4*M_PI*t) + 2*sin(.7*M_PI*twirl3/3)*sin(.3*M_PI*t) );
 	
 	glClearAccum(1.0, 1.0, 1.0, 1.0);
 	glClearColor(0.05, 0.1, 0.4, 1.0);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+
+	glUseProgram(1);
 
 	// /* MOVE ME AT SCREEN SPACE (ORTHO)! */
 	// float FPS = 1.0 / getEllapsedSeconds(TIMER_FPS);
@@ -43,43 +46,86 @@ void display() {
 
 	glBlendFunc(GL_ONE, GL_ZERO);
 	glDepthFunc(GL_LESS);
-	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(g_player_fov, g_window_width/(float)g_window_height, 0.1, 100.0);
-	// gluOrtho2D(0, g_window_width, 0, g_window_height);
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glRotatef(m_deg(g_camera->rotation.x + g_camera->rotation_offset.x), 1.0, 0.0, 0.0);
-	glRotatef(m_deg(g_camera->rotation.y + g_camera->rotation_offset.y), 0.0, 1.0, 0.0);
-	glTranslatef(
-		-(g_camera->position.x + g_camera->position_offset.x),
-		-(g_camera->position.y + g_camera->position_offset.y),
-		-(g_camera->position.z + g_camera->position_offset.z)
-	);
+
+
+	// Set matrices
+
+	#ifdef USE_MODERN_PIPELINE
+
+		int i;
+		mat4_t m;
+		
+		mat4_identity(m);
+		i = glGetUniformLocation(g_main_shader_program, "model");
+		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+
+		cam_get_inv_transform(g_camera, m);
+		// mat4_print(m);
+		i = glGetUniformLocation(g_main_shader_program, "view");
+		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+
+		mat4_perspective(m
+			, g_window_width/(float)g_window_height
+			, g_camera->yfov
+			, g_camera->znear
+			, g_camera->zfar);
+		i = glGetUniformLocation(g_main_shader_program, "proj");
+		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+
+	#else
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluPerspective(g_camera->yfov, 
+			g_window_width/(float)g_window_height, 
+			g_camera->znear,
+			g_camera->zfar);
+		// gluOrtho2D(0, g_window_width, 0, g_window_height);
+		
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glRotatef(g_camera->angles[0], 1, 0, 0);
+		glRotatef(g_camera->angles[1], 0, 1, 0);
+		glRotatef(g_camera->angles[2], 0, 0, 1);
+		glTranslatef(-g_camera->eye[0], -g_camera->eye[1], -g_camera->eye[2]);
+
+		glLoadTransposeMatrixf(m);
+
+		// glRotatef(g_camera->rotation[0], 1, 0, 0);
+		// glRotatef(g_camera->rotation[1], 0, 1, 0);
+		// glRotatef(g_camera->rotation[2], 0, 0, 1);
+		// glTranslatef(g_camera->eye[0], g_camera->eye[1], g_camera->eye[2]);
+		// glRotatef(m_deg(g_camera->rotation[0] + g_camera->rotation_offset[0]), 1.0, 0.0, 0.0);
+		// glRotatef(m_deg(g_camera->rotation[1] + g_camera->rotation_offset[1]), 0.0, 1.0, 0.0);
+		// glTranslatef(
+		// 	-(g_camera->eye[0] + g_camera->position_offset[0]),
+		// 	-(g_camera->eye[1] + g_camera->position_offset[1]),
+		// 	-(g_camera->eye[2] + g_camera->position_offset[2])
+		// );
+	#endif
 
 	// create light source to follow player around
-	vec3_t light_offset = (vec3_t){-0.16, -0.02, -0.35};
-	vec3_rotate(&light_offset, -0.5*g_camera->rotation.x, -g_camera->rotation.y, 0);
+	vec3_t light_pos;
+	vec3(light_pos, -0.16, -0.02, -0.35);
+	vec3_rotate(light_pos, light_pos, -0.5*g_camera->angles[0], -g_camera->angles[1], 0);
 		if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
-			vec3_rotate(&light_offset,
-        		-g_camera->rotation_offset.x,
-        		-g_camera->rotation_offset.y,
-        		-g_camera->rotation_offset.z);
+			vec3_rotate(light_pos, light_pos,
+        		-g_camera->angles[0],
+        		-g_camera->angles[1],
+        		-g_camera->angles[2]);
         }
 	float light_position[] = { 
-		g_camera->position.x + light_offset.x,
-		g_camera->position.y + light_offset.y - 0.3*g_camera->rotation.x,
-		g_camera->position.z + light_offset.z,
+		g_camera->eye[0] + light_pos[0],
+		g_camera->eye[1] + light_pos[1] - 0.3*g_camera->angles[0],
+		g_camera->eye[2] + light_pos[2],
 		1.0 };
 
-	float light_direction[] = { g_camera->look.x, g_camera->look.y, g_camera->look.z, 1.0 };
+	float light_direction[] = { g_camera->look[0], g_camera->look[1], g_camera->look[2], 1.0 };
 	    if ( g_state[G_PLAYER_LOOK_BEHIND] ) {
-        	vec3_rotate(&light_direction,
-        		-g_camera->rotation_offset.x,
-        		-g_camera->rotation_offset.y,
-        		-g_camera->rotation_offset.z);
+        	vec3_rotate(light_direction, light_direction,
+        		-g_camera->angles[0],
+        		-g_camera->angles[1],
+        		-g_camera->angles[2]);
         }
 
 	// flash light settings
@@ -103,7 +149,7 @@ void display() {
 	glLightfv(GL_LIGHT7, GL_POSITION, light_position2);
 	
 	// terror light settings
-	float party_direction[] = { sin(2*PI*t), -sin(2*PI*twirl1), cos(2*PI*t*flare) };
+	float party_direction[] = { sin(2*M_PI*t), -sin(2*M_PI*twirl1), cos(2*M_PI*t*flare) };
 	float party_light_color1[] = { 0.5 + twirl1 / 4.0, 0.5 + twirl3 / 4.0, 0.5 + twirl2 / 4.0, 1.0 };
 	float party_light_color2[] = { 0.5 - twirl1 / 4.0, 0.5 - twirl3 / 4.0, 0.5 - twirl2 / 4.0, 1.0 };
 	float party_light_color3[] = { 0.5 + twirl1 / 3.0, 0.0, 0.0, 1.0 };
@@ -212,17 +258,17 @@ void display() {
 		glColor3f(1.0, 0.0, 0.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_camera->look.x, g_camera->look.y, g_camera->look.z);
+			glVertex3f(g_camera->look[0], g_camera->look[1], g_camera->look[2]);
 		glEnd();
 		glColor3f(1.0, 1.0, 0.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_camera->up.x, g_camera->up.y, g_camera->up.z);
+			glVertex3f(g_camera->up[0], g_camera->up[1], g_camera->up[2]);
 		glEnd();
 		glColor3f(0.0, 0.0, 1.0);
 		glBegin(GL_LINES);
 			glVertex3f(0.0, 0.0, 0.0);
-			glVertex3f(g_camera->right.x, g_camera->right.y, g_camera->right.z);
+			glVertex3f(g_camera->right[0], g_camera->right[1], g_camera->right[2]);
 		glEnd();
 		glPopMatrix();
 	}
@@ -230,7 +276,7 @@ void display() {
 	/* Player vision animated overlays */
 	static bool just_turned_off_lights = false;
 	static float a, b, vision_adapt_amount;
-    float vision_decay_amount = (g_player_stress_level/10.0)*(1.0 + 0.2*sin(2*PI*t));
+    float vision_decay_amount = (g_player_stress_level/10.0)*(1.0 + 0.2*sin(2*M_PI*t));
 	float alpha = 0.25*(1 - exp(-(g_player_stress_level/3.0)*(g_player_stress_level/3.0)));
 
 	/**** THIS SECTION IS SCREEN SPACE EFFECTS -- ORTHO *****/
@@ -353,7 +399,22 @@ void display() {
 		glPopMatrix();
 	}
 
+	// get shader program handle
+	uint prog = ((shader_t*)get_asset(MAP_ASSET_DEFAULT_SHADER)->obj)->gl_handle;
+
+	glUseProgram(prog);
+	glUniform1i(glGetUniformLocation(prog, "albedo_map"), 0);
+	glUniform1i(glGetUniformLocation(prog, "normal_map"), 1);
+	glUniform1i(glGetUniformLocation(prog, "surface_map"), 2);
+
 	// show wireframe?
+
+	#ifdef USE_MODERN_PIPELINE
+
+		// wireframe: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+		// normal: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+	
+	#else
 	if ( g_state[G_SHOW_WIREFRAME] ) {
 		glBlendFunc(GL_ONE, GL_ONE);
 		glCallList(GL_LIST_ID_WIREFRAME);
@@ -361,6 +422,6 @@ void display() {
 	} else {
 		glBlendFunc(GL_ONE, GL_ZERO);
 		glCallList(GL_LIST_ID_MAP);
-		glBlendFunc(GL_ONE, GL_ZERO);
 	}
+	#endif
 }

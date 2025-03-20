@@ -1,7 +1,6 @@
 #include "shared.h"
 #include "timing.h"
 
-#include <math.h>
 #include <stdlib.h>
 #include <sys/time.h>
 

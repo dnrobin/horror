@@ -13,9 +13,9 @@ h_entity new_entity() {
 	}
 	
 	// initialize entity
-	entity->position = vec3(0.0, 0.0, 0.0);
-	entity->direction = vec3(0.0, 0.0, 1.0);
-	entity->up = vec3(0.0, 1.0, 0.0);
+	vec3(entity->position, 0.0, 0.0, 0.0);
+	vec3(entity->direction, 0.0, 0.0, 1.0);
+	vec3(entity->up, 0.0, 1.0, 0.0);
 	entity->state = 0x0;
 	
 	// add instance to array
@@ -25,16 +25,16 @@ h_entity new_entity() {
 }
 
 void position_entity(h_entity ent, vec3_t p) {
-	ent->position = p;
+	vec3_copy(ent->position, p);
 }
 
 void move_entity(h_entity ent, vec3_t d) {
-	ent->position = vec3_add(ent->position, d);
+	vec3_add(ent->position, ent->position, d);
 }
 
 void rotate_entity(h_entity ent, vec3_t r) {
-	vec3_rotate(&ent->direction, r.x, r.y, r.z);
-	vec3_rotate(&ent->up, r.x, r.y, r.z);
+	// vec3_rotate(&ent->direction, r[0], r[1], r[2]);
+	// vec3_rotate(&ent->up, r[0], r[1], r[2]);
 }
 
 void point_entity(h_entity ent, vec3_t p) {

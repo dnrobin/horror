@@ -33,9 +33,9 @@ static sound_emitter_t *get_new_sound_emitter(const int sound_buffer_id)
 	
 	// set default values
 	emitter->options = 0x0;	// no flags set
-	emitter->position = vec3(0.0, 0.0, 0.0);
-	emitter->velocity = vec3(0.0, 0.0, 0.0);
-	emitter->direction = vec3(0.0, 0.0, 0.0);
+	vec3(emitter->position, 0.0, 0.0, 0.0);
+	vec3(emitter->velocity, 0.0, 0.0, 0.0);
+	vec3(emitter->direction, 0.0, 0.0, 0.0);
 	emitter->gain = 1.0;	// nominal gain
 	emitter->pitch = 1.0;
 	emitter->gain_rolloff = 1.0;
@@ -119,10 +119,10 @@ static int add_sound_emitter_to_scene(sound_emitter_t* emitter)
 	return 1;
 }
 
-void s_sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up)
+void s_sound_update_listener(vec3_t position, vec3_t direction, vec3_t up)
 {	
 	// orientation parameters
-	ALfloat orientation[] = { direction->x, direction->y, direction->z, up->x, up->y, up->z };
+	ALfloat orientation[] = { direction[0], direction[1], direction[2], up[0], up[1], up[2] };
 	
 	// set listener position
 	alListenerfv(AL_POSITION, (ALfloat*)position);
@@ -143,9 +143,9 @@ int s_create_sound_emitter(sound_emitter_descriptor_t *desc)
 
 	// set emitter
 	emitter->options = desc->options;
-	emitter->position = vec3(desc->position[0],desc->position[1],desc->position[2]);
-	emitter->velocity = vec3(desc->velocity[0],desc->velocity[1],desc->velocity[2]);
-	emitter->direction = vec3(desc->direction[0],desc->direction[1],desc->direction[2]);
+	vec3(emitter->position, desc->position[0],desc->position[1],desc->position[2]);
+	vec3(emitter->velocity, desc->velocity[0],desc->velocity[1],desc->velocity[2]);
+	vec3(emitter->direction, desc->direction[0],desc->direction[1],desc->direction[2]);
 	emitter->gain = desc->gain;
 	emitter->gain_rolloff = desc->gain_rolloff;
 	emitter->min_distance = desc->min_distance;

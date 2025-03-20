@@ -1,68 +1,150 @@
 #include "shared.h"
 #include "camera.h"
 
+/**
+ * The camera can be used as a fly cam or an FPS cam. This
+ * means that in fly cam mode, movement and rotations are 
+ * in full 3-space. In FPS mode, movement is limited to the
+ * plane in which the camera is travelling.
+ **/
 
-void c_camera_update_referential(camera_t* cam) {
-	
-	// float pitch = PI/2 + cam->rotation.x;	// map sperical vec3_angles to local cam
-	// float yaw = PI - cam->rotation.y;
-	// float roll = cam->rotation.z;
 
-	cam->look = vec3_normalize(cam->look);
-	cam->up = vec3(0, 1, 0);
-	cam->right = vec3_normalize(vec3_cross(cam->look, cam->up));
-	cam->up = vec3_normalize(vec3_cross(cam->right, cam->look));
-	
-	// cam->look = (vec3_t){ sin(pitch)*sin(yaw), cos(pitch), sin(pitch)*cos(yaw) };					// look direction vector
-	// cam->up = (vec3_t){ -cos(pitch)*sin(yaw), sin(pitch), -cos(pitch)*cos(yaw) };					// up direction vector
-	// cam->right = (vec3_t){ -cos(yaw), sin(pitch)*cos(pitch)*cos(yaw)*(sin(yaw)-cos(yaw)), sin(yaw) };	// right direction vector
-}
+static void recalculate_basis_fps(camera_t *c)
+{
+	c->angles[0] = M_CLAMP(c->angles[0], -M_PI_2, M_PI_2);
+	c->angles[2] = M_CLAMP(c->angles[2], -M_PI_4, M_PI_4);
+	// c->angles[1] = m_wrap(c->angles[1]);
 
-void c_camera_set_pos(camera_t* cam, const float x, const float y, const float z) {
-	cam->position = (vec3_t){ x, y, z };
-}
+	printf("TROUBLESHOOT CAMERA\n");
+	printf("pitch:\t%f\n", c->angles[0]);
+	printf("yaw:\t%f\n", c->angles[1]);
+	printf("roll:\t%f\n", c->angles[2]);
 
-void c_camera_set_rot(camera_t* cam, const float x, const float y, const float z) {
-	cam->rotation = (vec3_t){ x, y, z };
-	c_camera_update_referential(cam);
-}
+	vec3(c->right
+		, m_cos(c->angles[1])
+		, 0	// always confined to the plane for FPS
+		,-m_sin(c->angles[1])
+	);
 
-void c_camera_rotate(camera_t* cam, const vec3_t rotation) {
-	cam->rotation = vec3_add(cam->rotation, rotation);
-	c_camera_update_referential(cam);
-}
+	vec3(c->up
+		, m_sin(c->angles[0])*m_sin(c->angles[1])
+		, m_cos(c->angles[0])
+		, m_sin(c->angles[0])*m_cos(c->angles[1])
+	);
 
-void c_camera_move(camera_t* cam, const vec3_t displacement) {
-	cam->position = vec3_add(cam->position, displacement);
-}
+	// oriented along true r/h +z direction
+	vec3(c->look
+		, m_cos(c->angles[0])*m_sin(c->angles[1])
+		,-m_sin(c->angles[0])
+		, m_cos(c->angles[0])*m_cos(c->angles[1])
+	);
 
-void c_camera_move_forward(camera_t* cam, const float distance) {
-	c_camera_move(cam, vec3_scale(cam->look, distance));
-}
+	// printf("%f\n",vec3_dot(c->right, c->up));
+	// printf("%f\n",vec3_dot(c->up, c->look));
+	// printf("%f\n\n",vec3_dot(c->look, c->right));
 
-void c_camera_move_right(camera_t* cam, const float distance) {
-	c_camera_move(cam, vec3_scale(cam->right, distance));
-}
-
-void c_camera_move_backward(camera_t* cam, const float distance) {
-	c_camera_move(cam, vec3_scale(cam->look, -distance));
-}
-
-void c_camera_move_left(camera_t* cam, const float distance) {
-	c_camera_move(cam, vec3_scale(cam->right, -distance));
+	printf("right:\t"); vec3_print(c->right);
+	printf("up:\t"); vec3_print(c->up);
+	printf("look:\t"); vec3_print(c->look);
+	printf("======================\n");
 }
 
-void c_camera_set_pos_offset(camera_t* cam, const float x, const float y, const float z) {
-	cam->position_offset = (vec3_t){ x, y, z };
+void cam_get_transform(camera_t *c, mat4_t out)
+{
+	// TODO: add camera tilt
+
 }
-void c_camera_set_rot_offset(camera_t* cam, const float x, const float y, const float z) {
-	cam->rotation_offset = (vec3_t){ x, y, z };
-	c_camera_update_referential(cam);
+void cam_get_inv_transform(camera_t *c, mat4_t out)
+{
+	// TODO: add camera tilt
+
+	mat4_identity(out);
+	vec3_copy(&out[0], c->right);
+	vec3_copy(&out[1], c->up);
+	vec3_copy(&out[2], c->look);
+	out[0][3] = -vec3_dot(c->eye, c->right);
+	out[1][3] = -vec3_dot(c->eye, c->up);
+	out[2][3] = -vec3_dot(c->eye, c->look);
 }
-void c_camera_rotate_offset(camera_t* cam, const vec3_t rotation) {
-	cam->rotation_offset = vec3_add(cam->rotation_offset, rotation);
-	c_camera_update_referential(cam);
+void cam_reset_orientation(camera_t *c)
+{
+	vec3(c->angles, 0, 0, 0);
+	recalculate_basis_fps(c);
 }
-void c_camera_move_offset(camera_t* cam, const vec3_t displacement) {
-	cam->position_offset = vec3_add(cam->position_offset, displacement);
+void cam_move_to(camera_t *c, const vec3_t p)
+{
+	vec3_copy(c->eye, p);
+}
+void cam_move_by(camera_t *c, const vec3_t v)
+{
+	vec3_add(c->eye, c->eye, v);
+}
+void cam_move_forward(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->look, -d);
+	cam_move_by(c, v);
+}
+void cam_move_backward(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->look, +d);
+	cam_move_by(c, v);
+}
+void cam_move_left(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->right, -d);
+	cam_move_by(c, v);
+}
+void cam_move_right(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->right, +d);
+	cam_move_by(c, v);
+}
+void cam_move_up(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->up, +d);
+	cam_move_by(c, v);
+}
+void cam_move_down(camera_t *c, float d)
+{
+	vec3_t v;
+	vec3_scale(v, c->up, -d);
+	cam_move_by(c, v);
+}
+void cam_set_angles(camera_t *c, m_float pitch, m_float yaw, m_float roll)
+{
+	vec3(c->angles, pitch, yaw, roll);
+	recalculate_basis_fps(c);
+}
+void cam_lookat(camera_t *c, const m_float *point)
+{
+	vec3_t d;
+	vec3_sub(d, point, c->eye);
+	vec3_normalize(d, d);
+
+	// TODO: validate this
+	c->angles[0] = m_asin(d[1]);
+	m_float h = m_max(M_FLOAT_EPSILON, m_acos(d[1]));
+	c->angles[1] = m_acos(-d[2]/h);
+
+	recalculate_basis_fps(c);
+}
+void cam_pitch(camera_t *c, m_float angle)
+{
+	c->angles[0] += angle;
+	recalculate_basis_fps(c);
+}
+void cam_pan(camera_t *c, m_float angle)
+{
+	c->angles[1] += angle;
+	recalculate_basis_fps(c);
+}
+void cam_tilt(camera_t *c, m_float angle)
+{
+	c->angles[2] += angle;
+	recalculate_basis_fps(c);
 }

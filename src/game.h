@@ -6,9 +6,12 @@
 #include "collision.h"
 #include "camera.h"
 
-void init();
-void update();
-void shutdown();
+// TEMP
+int g_main_shader_program;
+
+void game_code_init();
+void game_code_update();
+void game_code_shutdown();
 
 t_physics_particle g_camera_physics_model;
 t_bounding_sphere g_camera_collision_model;
@@ -23,13 +26,6 @@ float g_player_fov;
 
 /* global object variables */
 extern camera_t *g_camera;
-
-/* window state variables */
-uint g_window_width;
-uint g_window_height;
-uint g_window_x;
-uint g_window_y;
-uint g_frame_millisec;
 
 /* game user settings */
 float g_mouse_sensitivity;		// values range 0.0 - 1.0

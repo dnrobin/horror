@@ -20,7 +20,7 @@ void addTrigger(const vec3_t position, void(*action)(), const char retrigger, co
 	trig->triggered = 0;
 	
 	trig->action = action;
-	trig->position = position;
+	vec3(trig->position, position[0], position[1], position[2]);
 	
 	push_array(g_triggers, trig);
 }

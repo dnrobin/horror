@@ -8,8 +8,6 @@
 #include "game.h"
 #include "gamedefs.h"
 
-#include "glad.h"
-
 #define MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO 		1
 #define MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL 		2
 #define MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS 	3
@@ -76,7 +74,11 @@ static map_asset_descriptor_t map_assets[] = {
 static const int map_assets_count = sizeof(map_assets) / sizeof(map_asset_descriptor_t);
 
 static map_shader_descriptor_t map_shaders[] = {
+	#ifdef USE_MODERN_PIPELINE
+	{ MAP_ASSET_DEFAULT_SHADER, "shaders/modern.vs", "shaders/modern.fs" }
+	#else
 	{ MAP_ASSET_DEFAULT_SHADER, "shaders/default.vert", "shaders/default.frag" }
+	#endif
 };
 static const int map_shaders_count = sizeof(map_shaders) / sizeof(map_shader_descriptor_t);
 

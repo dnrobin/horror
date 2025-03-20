@@ -7,8 +7,7 @@
 #include "sound.h"
 #include "game.h"
 
-static struct { int x, y; } old_coords;
-static struct { float pitch, yaw; } look_angles;
+static vec2_t old_coords;
 
 void update_mouse()
 {
@@ -20,38 +19,19 @@ void update_mouse()
 	// Note: since we warp mouse back to center every frame,
 	// these coordinates are actually deltas from one frame
 	// to the next.
-	float delta_x = (xpos - old_coords.x) / (float)g_window_width;
-	float delta_y = (ypos - old_coords.y) / (float)g_window_height;
+	float delta_x = (xpos - old_coords[0]) / (float)g_window_width;
+	float delta_y = (ypos - old_coords[1]) / (float)g_window_height;
 
-	old_coords.x = xpos;
-	old_coords.y = ypos;
+	old_coords[0] = xpos;
+	old_coords[1] = ypos;
 
 	float mouse_y_dir = +1;
 	if (g_mouse_invert_y) {
 		mouse_y_dir = -1;
 	}
-
-	look_angles.pitch += delta_y * g_mouse_sensitivity * mouse_y_dir;
-	look_angles.yaw   += delta_x * g_mouse_sensitivity;
-
-	if(look_angles.pitch > PI/2.f) {
-		look_angles.pitch = PI/2.f;
-	}
-
-	if(look_angles.pitch < -PI/2.f) {
-		look_angles.pitch = -PI/2.f;
-	}
-
-	// upate camera look direction
-	g_camera->look.x = m_cos(look_angles.yaw) * m_cos(look_angles.pitch);
-	g_camera->look.y = m_sin(look_angles.pitch);
-	g_camera->look.z = m_sin(look_angles.yaw) * m_cos(look_angles.pitch);
-
-	c_camera_update_referential(g_camera);
-
-	/* TO BE REMOVED... */
-	g_camera->rotation.x = look_angles.pitch;
-	g_camera->rotation.y = PI/2.f + look_angles.yaw;
+	
+	cam_pan(g_camera, delta_x * g_mouse_sensitivity);
+	cam_pitch(g_camera, delta_y * g_mouse_sensitivity * mouse_y_dir);
 }
 
 int G_DEBUG_CURRENT_SOUND_ID = 0;
@@ -61,10 +41,6 @@ void update_keys()
 		g_state[G_PHY_CLIPPING] = !g_state[G_PHY_CLIPPING];
 	}
 	
-	if (get_key(GLFW_KEY_F2)) {
-		MY_SUPER_FLAG = !MY_SUPER_FLAG;
-	}
-
 	g_state[G_PLAYER_MOVING] = false;
 
 	if (get_key(GLFW_KEY_W)) {
@@ -145,11 +121,8 @@ void update_keys()
 
 void c_init_controls()
 {
-	look_angles.pitch = 0;
-	look_angles.yaw = 0;
-
-	old_coords.x = g_window_width/2;
-	old_coords.y = g_window_height/2;
+	old_coords[0] = g_window_width/2;
+	old_coords[1] = g_window_height/2;
 }
 
 void c_update_controls()

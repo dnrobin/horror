@@ -16,10 +16,6 @@
 
 #include "game.h"
 
-#include "glad.h"
-#define GFLW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #include <string.h>
 #include <stdlib.h>
 
@@ -110,13 +106,15 @@ int main(int argc, char* argv[])
 
 	glfwInit();
 
+	m_srand((int)glfwGetTime() << 1234);
+
     glfwSetErrorCallback(error_callback);
 
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM | GLUT_RGBA | GLUT_ALPHA
+	#ifdef USE_MODERN_PIPELINE
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	#endif
 
 	win = glfwCreateWindow(800,600,"Horror Maze Game",NULL,NULL);
 
@@ -167,7 +165,7 @@ int main(int argc, char* argv[])
 	
 	init_al();									// initialize AL state
 	
-	init();		// init game environment
+	game_code_init();		// init game environment
 	
 	double oldtime = glfwGetTime();
 
@@ -177,7 +175,7 @@ int main(int argc, char* argv[])
 		double dt = (time - oldtime);
         if (dt > 0.0067)
         {
-			update(dt);
+			game_code_update(dt);
 
             glfwSwapBuffers(win);
 
@@ -189,7 +187,7 @@ int main(int argc, char* argv[])
 	
 	debug_print("\n== Shutting down ==\n");
 
-	shutdown();
+	game_code_shutdown();
 
 	shutdown_al();
 

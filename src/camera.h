@@ -1,45 +1,43 @@
-#ifndef __MAZE_GAME_CAMERA_H__
-#define __MAZE_GAME_CAMERA_H__
-
-/**
- * Camera holds everything to generate the view transform:
- * - position, orientation and field of view.
- * Some functions are provided to alter the state of the camera
- * through local transformations. These functions are mainly used
- * by the animation subsystem to create the illusion of head movement.
- */
+#ifndef __MAZE_GAME_CAM_H__
+#define __MAZE_GAME_CAM_H__
 
 typedef struct {
 
-	vec3_t position;
-	vec3_t rotation;
-
-	vec3_t right;
-	vec3_t up;
-
-	vec3_t position_offset;
-	vec3_t rotation_offset;
-
-	float fov_angle;
-	vec3_t look;
+	vec3_t				eye;		// world-space eye position
+	
+	vec3_t				right;
+	vec3_t				look;		// look direction (rh z)
+	vec3_t				up;			// up vector
+	
+	vec3_t 				angles;		// [pitch, yaw, roll]
+	
+	float 				yfov;
+	float				znear;
+	float				zfar;
 } camera_t;
 
-void c_camera_update_referential(camera_t* camera);
-void c_camera_set_pos(camera_t* camera, const float x, const float y, const float z);
-void c_camera_set_rot(camera_t* camera, const float x, const float y, const float z);
+/*
+ Animating the camera should actually be a point
+ on a sphere surrounding the camera which the cam
+ can track using lookat.
+*/
 
-// for animation purposes:
+void cam_get_transform(camera_t *c, mat4_t out);
+void cam_get_inv_transform(camera_t *c, mat4_t out);
 
-void c_camera_rotate(camera_t* camera, const vec3_t rotation);
-void c_camera_move(camera_t* camera, const vec3_t displacement);
-void c_camera_move_forward(camera_t* camera, const float distance);
-void c_camera_move_right(camera_t* camera, const float distance);
-void c_camera_move_backward(camera_t* camera, const float distance);
-void c_camera_move_left(camera_t* camera, const float distance);
-
-void c_camera_set_pos_offset(camera_t* camera, const float x, const float y, const float z);
-void c_camera_set_rot_offset(camera_t* camera, const float x, const float y, const float z);
-void c_camera_rotate_offset(camera_t* camera, const vec3_t rotation);
-void c_camera_move_offset(camera_t* camera, const vec3_t displacement);
+void cam_reset_orientation(camera_t *c);
+void cam_move_to(camera_t *c, const vec3_t p);
+void cam_move_by(camera_t *c, const vec3_t v);
+void cam_move_forward(camera_t *c, float d);
+void cam_move_backward(camera_t *c, float d);
+void cam_move_left(camera_t *c, float d);
+void cam_move_right(camera_t *c, float d);
+void cam_move_up(camera_t *c, float d);
+void cam_move_down(camera_t *c, float d);
+void cam_set_angles(camera_t *c, m_float pitch, m_float yaw, m_float roll);
+void cam_lookat(camera_t *c, const m_float *p);
+void cam_pitch(camera_t *c, m_float angle);
+void cam_tilt(camera_t *c, m_float angle);
+void cam_pan(camera_t *c, m_float angle);
 
 #endif

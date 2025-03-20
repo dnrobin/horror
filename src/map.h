@@ -6,47 +6,54 @@
 #define GL_LIST_ID_MAP 				1
 #define GL_LIST_ID_WIREFRAME 		2
 
-typedef struct t_map_descriptor {
-	uint nb_faces;
-	//unsigned int ofs_to_faces;
-} t_map_descriptor, *h_map_descriptor;
+#ifdef USE_MODERN_PIPELINE
 
-typedef struct t__face {
-	uint type;				// real face type (3 or 4)
-	vec3_t verts[4];		// extra vector if type 3
-	vec2_t tcoords[4];		// same
-	t_cRGBA colors[4];
-	vec3_t normal;
-	uint texid;
-} t__face;
+	int f_load_map_json(const char *filename);
 
-typedef struct t__face2 {
-	uint type;				// real face type (3 or 4)
-	vec3_t verts[4];		// extra vector if type 3
-	vec2_t tcoords[4];		// same
-	t_cRGBA colors[4];
-	vec3_t normal;
-	uint tex_diffuse_id;	// RGB color (3D)
-	uint tex_specular_id;	// Specular map (1D)
-	uint tex_height_id;		// Height value (1D)
-	uint tex_normal_id;		// Normal map (3D)
-} t__face2;
+#else
 
-#define FACE_TYPE_3 3
-#define FACE_TYPE_4 4
+	typedef struct t_map_descriptor {
+		uint nb_faces;
+		//unsigned int ofs_to_faces;
+	} t_map_descriptor, *h_map_descriptor;
 
-/* prototypes */
-int saveMap(const int mapc, const float* mapv, const char* filename );
-int saveMap2(const int mapc, const float* mapv, const char* filename );
-int loadMap(const char* filename);
-int loadMap2(const char* filename);
-void subdivision4(const t_face4* face, const int u, const int v, const int ndivs, int rec);
+	typedef struct t__face {
+		uint type;				// real face type (3 or 4)
+		vec3_t verts[4];		// extra vector if type 3
+		vec2_t tcoords[4];		// same
+		t_cRGBA colors[4];
+		vec3_t normal;
+		uint texid;
+	} t__face;
 
-t_face4* convertFace4( const t__face* );
-//t_face3 convertFace3( const t__face* );
-//t__face convertFace( const t_face3* );
-//t__face convertFace( const t_face4* );
+	typedef struct t__face2 {
+		uint type;				// real face type (3 or 4)
+		vec3_t verts[4];		// extra vector if type 3
+		vec2_t tcoords[4];		// same
+		t_cRGBA colors[4];
+		vec3_t normal;
+		uint tex_diffuse_id;	// RGB color (3D)
+		uint tex_specular_id;	// Specular map (1D)
+		uint tex_height_id;		// Height value (1D)
+		uint tex_normal_id;		// Normal map (3D)
+	} t__face2;
 
-#define NDIVS 3
+	#define FACE_TYPE_3 3
+	#define FACE_TYPE_4 4
+
+	int map_load(const char* filename);
+
+	int saveMap(const int mapc, const float* mapv, const char* filename );
+	int saveMap2(const int mapc, const float* mapv, const char* filename );
+	int loadMap2(const char* filename);
+
+	// void subdivision4(const t_face4* face, const int u, const int v, const int ndivs, int rec);
+	// t_face4* convertFace4( const t__face* );
+	// //t_face3 convertFace3( const t__face* );
+	// //t__face convertFace( const t_face3* );
+	// //t__face convertFace( const t_face4* );
+	// #define NDIVS 3
+
+#endif // USE_MODERN_PIPELINE
 
 #endif

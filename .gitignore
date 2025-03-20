@@ -3,3 +3,7 @@
 .d
 build
 ext
+a.out
+.so
+.dylib
+.lib

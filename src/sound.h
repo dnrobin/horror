@@ -71,7 +71,7 @@ typedef struct {
 } sound_emitter_t;
 
 
-void s_sound_update_listener(vec3_t* position, vec3_t* direction, vec3_t* up);
+void s_sound_update_listener(vec3_t position, vec3_t direction, vec3_t up);
 int s_create_sound_emitter(sound_emitter_descriptor_t *desc);
 
 void setSound(int source_id, int state_id);
