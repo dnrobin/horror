@@ -1,6 +1,8 @@
 #include "shared.h"
 #include "texture.h"
 
+#include "glad.h"
+
 int r_create_texture_buf(texture_t *texture, int w, int h, int n, const unsigned char *buf)
 {
     glGenTextures(1, &texture->gl_handle);

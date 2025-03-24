@@ -16,19 +16,17 @@
 
 #include "game.h"
 
+#include "glad.h"
+
 #include <string.h>
 #include <stdlib.h>
 
 static GLFWwindow *win = NULL;
-GLFWwindow *g_win;
 
+char* g_window_title = "Dark Maze";
 uint g_window_width = 1080;
 uint g_window_height = 675;
-uint g_window_x = 100;
-uint g_window_y = 100;
-char* g_window_title = "Dark Maze";
 bool g_fullscreen = true;
-uint g_frame_millisec = 26;
 
 
 char *env_asset_path = "./res/";
@@ -118,8 +116,6 @@ int main(int argc, char* argv[])
 
 	win = glfwCreateWindow(800,600,"Horror Maze Game",NULL,NULL);
 
-	g_win = win;
-
     glfwMakeContextCurrent(win);
 
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -157,11 +153,11 @@ int main(int argc, char* argv[])
 	
 	if ( g_fullscreen && strcmp(argv[argc-1],"-f") == 0 ) glfwMaximizeWindow(win);		// Put into full screen
 	
-	debug_print(KMAG "\n== Initializing graphics ==\n" KNRM);
+	INFO("\n== Initializing graphics ==\n");
 	
 	init_gl();									// initialize OpenGl state
 	
-	debug_print(KMAG "\n== Initializing sound ==\n" KNRM);
+	INFO("\n== Initializing sound ==\n");
 	
 	init_al();									// initialize AL state
 	
@@ -185,7 +181,7 @@ int main(int argc, char* argv[])
         glfwPollEvents();
     }
 	
-	debug_print("\n== Shutting down ==\n");
+	INFO("== Shutting down ==");
 
 	game_code_shutdown();
 

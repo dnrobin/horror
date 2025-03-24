@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "glad.h"
+
 static GLuint create_shader_with_source(GLenum type, const char **source, int *len)
 {
 	GLuint shader = glCreateShader(type);

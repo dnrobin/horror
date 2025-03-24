@@ -31,6 +31,12 @@
         "array": "c",
         "vector": "c",
         "r_render.h": "c",
-        "r_mesh.h": "c"
+        "r_mesh.h": "c",
+        "linmath.h": "c",
+        "types.h": "c",
+        "mem.h": "c",
+        "glfw3.h": "c",
+        "shader.h": "c",
+        "glad_210.h": "c"
     }
 }

@@ -35,8 +35,6 @@ void display()
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
-	glUseProgram(1);
-
 	// /* MOVE ME AT SCREEN SPACE (ORTHO)! */
 	// float FPS = 1.0 / getEllapsedSeconds(TIMER_FPS);
     // char buf[256];
@@ -47,62 +45,49 @@ void display()
 	glBlendFunc(GL_ONE, GL_ZERO);
 	glDepthFunc(GL_LESS);
 
+	glFrontFace(GL_CCW);
+	glShadeModel(GL_FRONT_AND_BACK);
+	glCullFace(GL_NONE);
 
-	// Set matrices
+	// get shader program handle
+	uint prog = ((shader_t*)get_asset(MAP_ASSET_DEFAULT_SHADER)->obj)->gl_handle;
 
-	#ifdef USE_MODERN_PIPELINE
+	glUseProgram(prog);
+	glUniform1i(glGetUniformLocation(prog, "albedo_map"), 0);
+	glUniform1i(glGetUniformLocation(prog, "normal_map"), 1);
+	glUniform1i(glGetUniformLocation(prog, "surface_map"), 2);
 
-		int i;
-		mat4_t m;
-		
-		mat4_identity(m);
-		i = glGetUniformLocation(g_main_shader_program, "model");
-		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+	
+	int loc;
 
-		cam_get_inv_transform(g_camera, m);
-		// mat4_print(m);
-		i = glGetUniformLocation(g_main_shader_program, "view");
-		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+	mat4_t v;
+	mat4_lookat_dir(v, g_camera->eye, g_camera->look, g_camera->up);
+	loc = glGetUniformLocation(g_main_shader_program, "m_View");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, v);
 
-		mat4_perspective(m
-			, g_window_width/(float)g_window_height
-			, g_camera->yfov
-			, g_camera->znear
-			, g_camera->zfar);
-		i = glGetUniformLocation(g_main_shader_program, "proj");
-		glUniformMatrix4fv(i, 1, GL_FALSE, m);
+	mat4_t p;
+	mat4_perspective(p
+		, g_window_width/(float)g_window_height
+		, g_camera->yfov
+		, g_camera->znear
+		, g_camera->zfar);
+	loc = glGetUniformLocation(g_main_shader_program, "m_Proj");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, p);
 
-	#else
+	mat4_t m;
+	mat4_identity(m);
+	loc = glGetUniformLocation(g_main_shader_program, "m_Model");
+	glUniformMatrix4fv(loc, 1, GL_FALSE, m);
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(g_camera->yfov, 
-			g_window_width/(float)g_window_height, 
-			g_camera->znear,
-			g_camera->zfar);
-		// gluOrtho2D(0, g_window_width, 0, g_window_height);
-		
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRotatef(g_camera->angles[0], 1, 0, 0);
-		glRotatef(g_camera->angles[1], 0, 1, 0);
-		glRotatef(g_camera->angles[2], 0, 0, 1);
-		glTranslatef(-g_camera->eye[0], -g_camera->eye[1], -g_camera->eye[2]);
+	mat3_t n;
+	mat3_mul_mat3(n, v, m);
+	loc = glGetUniformLocation(g_main_shader_program, "m_NormalMatrix");
+	glUniformMatrix3fv(loc, 1, GL_FALSE, n);
 
-		glLoadTransposeMatrixf(m);
-
-		// glRotatef(g_camera->rotation[0], 1, 0, 0);
-		// glRotatef(g_camera->rotation[1], 0, 1, 0);
-		// glRotatef(g_camera->rotation[2], 0, 0, 1);
-		// glTranslatef(g_camera->eye[0], g_camera->eye[1], g_camera->eye[2]);
-		// glRotatef(m_deg(g_camera->rotation[0] + g_camera->rotation_offset[0]), 1.0, 0.0, 0.0);
-		// glRotatef(m_deg(g_camera->rotation[1] + g_camera->rotation_offset[1]), 0.0, 1.0, 0.0);
-		// glTranslatef(
-		// 	-(g_camera->eye[0] + g_camera->position_offset[0]),
-		// 	-(g_camera->eye[1] + g_camera->position_offset[1]),
-		// 	-(g_camera->eye[2] + g_camera->position_offset[2])
-		// );
-	#endif
+	mat4_print(p);
+	mat4_print(v);
+	mat4_print(m);
+	mat3_print(n);
 
 	// create light source to follow player around
 	vec3_t light_pos;
@@ -399,29 +384,11 @@ void display()
 		glPopMatrix();
 	}
 
-	// get shader program handle
-	uint prog = ((shader_t*)get_asset(MAP_ASSET_DEFAULT_SHADER)->obj)->gl_handle;
-
-	glUseProgram(prog);
-	glUniform1i(glGetUniformLocation(prog, "albedo_map"), 0);
-	glUniform1i(glGetUniformLocation(prog, "normal_map"), 1);
-	glUniform1i(glGetUniformLocation(prog, "surface_map"), 2);
-
-	// show wireframe?
-
-	#ifdef USE_MODERN_PIPELINE
-
-		// wireframe: glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-		// normal: glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-	
-	#else
 	if ( g_state[G_SHOW_WIREFRAME] ) {
-		glBlendFunc(GL_ONE, GL_ONE);
-		glCallList(GL_LIST_ID_WIREFRAME);
-		glBlendFunc(GL_ONE, GL_ZERO);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} else {
-		glBlendFunc(GL_ONE, GL_ZERO);
-		glCallList(GL_LIST_ID_MAP);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-	#endif
+
+	glCallList(GL_LIST_ID_MAP);
 }

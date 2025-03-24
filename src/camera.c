@@ -11,15 +11,18 @@
 
 static void recalculate_basis_fps(camera_t *c)
 {
-	c->angles[0] = M_CLAMP(c->angles[0], -M_PI_2, M_PI_2);
+	if (c->angles[0] > +M_PI_2) c->angles[0] = +M_PI_2;
+	if (c->angles[0] < -M_PI_2) c->angles[0] = -M_PI_2;
+
 	c->angles[2] = M_CLAMP(c->angles[2], -M_PI_4, M_PI_4);
-	// c->angles[1] = m_wrap(c->angles[1]);
 
 	printf("TROUBLESHOOT CAMERA\n");
 	printf("pitch:\t%f\n", c->angles[0]);
 	printf("yaw:\t%f\n", c->angles[1]);
 	printf("roll:\t%f\n", c->angles[2]);
 
+	// TODO: Update this code to work with new mat4_transform_**
+	
 	vec3(c->right
 		, m_cos(c->angles[1])
 		, 0	// always confined to the plane for FPS
@@ -47,24 +50,6 @@ static void recalculate_basis_fps(camera_t *c)
 	printf("up:\t"); vec3_print(c->up);
 	printf("look:\t"); vec3_print(c->look);
 	printf("======================\n");
-}
-
-void cam_get_transform(camera_t *c, mat4_t out)
-{
-	// TODO: add camera tilt
-
-}
-void cam_get_inv_transform(camera_t *c, mat4_t out)
-{
-	// TODO: add camera tilt
-
-	mat4_identity(out);
-	vec3_copy(&out[0], c->right);
-	vec3_copy(&out[1], c->up);
-	vec3_copy(&out[2], c->look);
-	out[0][3] = -vec3_dot(c->eye, c->right);
-	out[1][3] = -vec3_dot(c->eye, c->up);
-	out[2][3] = -vec3_dot(c->eye, c->look);
 }
 void cam_reset_orientation(camera_t *c)
 {

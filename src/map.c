@@ -13,6 +13,8 @@
 
 #include "parson.h"
 
+#include "glad.h"
+
 #include <string.h>
 #include <stdlib.h>
 

@@ -25,14 +25,25 @@ typedef struct {
 } vertex_attrib_t;
 
 typedef struct {
-    int                 gl_handle;
+    uint                 gl_handle;
     vertex_attrib_t     attribs[MAX_VERTEX_ATTRIBUTES];
     size_t              vertex_size;
     void                *data;
 } vertex_buffer_t;
 
 typedef struct {
-    int                 gl_handle;
+    int                 program_handle;
+    color_t             base_color;
+    int                 base_map;
+    int                 normal_map;
+    int                 height_map;
+    int                 wet_map;
+    int                 ao_map;
+} material_t;
+
+typedef struct {
+
+    uint                gl_handle;  // handle to vao
     int                 draw_type;  // ex. GL_TRIANGLE
 
     size_t              num_vertices;
@@ -40,8 +51,10 @@ typedef struct {
     vertex_buffer_t     *buffers;
     
     size_t              num_indices;
-    size_t              size_indices;
+    size_t              size_indices;   // data type size
     unsigned int        *indices;
+
+    material_t          material;
 } mesh_t;
 
 int r_create_mesh(mesh_t *mesh);

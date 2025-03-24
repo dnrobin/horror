@@ -1,11 +1,11 @@
 #ifndef __MAZE_GAME_MATH_H__
 #define __MAZE_GAME_MATH_H__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-#include <stdio.h>
 
 // #define USE_DOUBLE_PRECISION
 
@@ -125,7 +125,8 @@ static inline bool m_within(m_float x, m_float a, m_float b)
 
 static inline m_float m_wrap(m_float x)
 {
-    // return m_rem(x, 2*M_PI) * 2*M_PI;
+    // TODO: troubleshoot remainderf() outputs unexpected values!
+    return m_rem(x, 2*M_PI) * 2*M_PI;
 }
 
 static inline void m_srand(int seed)
@@ -148,8 +149,8 @@ static inline m_float m_rand_btw(m_float a, m_float b)
 //-------------------------------------------------------------------------------------
 
 typedef int vec2i_t[2];
-static vec2i_t vec2i_zeros = { 0, 0 };
-static vec2i_t vec2i_ones  = { 1, 1 };
+static const vec2i_t VEC2i_ZEROS = { 0, 0 };
+static const vec2i_t VEC2i_ONES  = { 1, 1 };
 
 static inline void vec2i(int *v, int x, int y)
 {
@@ -191,8 +192,10 @@ static inline void vec2i_print(const int *v)
 //-------------------------------------------------------------------------------------
 
 typedef m_float vec2_t[2];
-static vec2_t vec2_zeros = { 0.0, 0.0 };
-static vec2_t vec2_ones  = { 1.0, 1.0 };
+static const vec2_t VEC2_ZEROS = { 0.0, 0.0 };
+static const vec2_t VEC2_ONES  = { 1.0, 1.0 };
+static const vec2_t VEC2_X     = { 1.0, 0.0 };
+static const vec2_t VEC2_Y     = { 0.0, 1.0 };
 
 static inline void vec2(m_float *v, m_float x, m_float y)
 {
@@ -343,8 +346,12 @@ static inline void vec2_print(const m_float *v)
 //-------------------------------------------------------------------------------------
 
 typedef m_float vec3_t[3];
-static vec3_t vec3_zeros = { 0.0, 0.0, 0.0 };
-static vec3_t vec3_ones  = { 1.0, 1.0, 1.0 };
+static const vec3_t VEC3_ZEROS = { 0.0, 0.0, 0.0 };
+static const vec3_t VEC3_ONES  = { 1.0, 1.0, 1.0 };
+static const vec3_t VEC3_X     = { 1.0, 0.0, 0.0 };
+static const vec3_t VEC3_Y     = { 0.0, 1.0, 0.0 };
+static const vec3_t VEC3_Z     = { 0.0, 0.0, 1.0 };
+static const vec3_t VEC3_UP    = { 0.0, 1.0, 0.0 };
 
 static inline void vec3(m_float *v, m_float x, m_float y, m_float z)
 {
@@ -560,8 +567,12 @@ static inline void vec3_print(const m_float *v)
 //-------------------------------------------------------------------------------------
 
 typedef m_float vec4_t[4];
-static vec4_t vec4_zeros = { 0.0, 0.0, 0.0, 0.0 };
-static vec4_t vec4_ones  = { 1.0, 1.0, 1.0, 1.0 };
+static const vec4_t VEC4_ZEROS = { 0.0, 0.0, 0.0, 0.0 };
+static const vec4_t VEC4_ONES  = { 1.0, 1.0, 1.0, 1.0 };
+static const vec4_t VEC4_X     = { 1.0, 0.0, 0.0, 0.0 };
+static const vec4_t VEC4_Y     = { 0.0, 1.0, 0.0, 0.0 };
+static const vec4_t VEC4_Z     = { 0.0, 0.0, 1.0, 0.0 };
+static const vec4_t VEC4_W     = { 0.0, 0.0, 0.0, 1.0 };
 
 static inline void vec4(m_float *v, m_float x, m_float y, m_float z, m_float w)
 {
@@ -637,9 +648,9 @@ static inline void vec4_print(const m_float *v)
 /** column-major representation, addressing follows m[COL][ROW] **/
 
 typedef vec2_t mat2_t[2];
-static mat2_t mat2_zeros = { {0.0, 0.0}, {0.0, 0.0} };
-static mat2_t mat2_ones  = { {1.0, 1.0}, {1.0, 1.0} };
-static mat2_t mat2_eye   = { {1.0, 0.0}, {0.0, 1.0} };
+static const mat2_t MAT2_ZEROS = { {0.0, 0.0}, {0.0, 0.0} };
+static const mat2_t MAT2_ONES  = { {1.0, 1.0}, {1.0, 1.0} };
+static const mat2_t MAT2_EYE   = { {1.0, 0.0}, {0.0, 1.0} };
 
 static inline void mat2(vec2_t *m
     , m_float m11, m_float m12
@@ -702,9 +713,9 @@ static inline void mat2_print(const vec2_t *m)
 /** column-major representation, addressing follows m[COL][ROW] **/
 
 typedef vec3_t mat3_t[3];
-static mat3_t mat3_zeros = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
-static mat3_t mat3_ones  = { {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0} };
-static mat3_t mat3_eye   = { {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0} };
+static const mat3_t MAT3_ZEROS = { {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0} };
+static const mat3_t MAT3_ONES  = { {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, {1.0, 1.0, 1.0} };
+static const mat3_t MAT3_EYE   = { {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0} };
 
 static inline void mat3(vec3_t *m
     , m_float m11, m_float m12, m_float m13
@@ -817,9 +828,9 @@ static inline void mat3_print(const vec3_t *m)
 /** column-major representation, addressing follows m[COL][ROW] **/
 
 typedef vec4_t mat4_t[4];
-static mat4_t mat4_zeros = { {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0} };
-static mat4_t mat4_ones  = { {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0} };
-static mat4_t mat4_eye   = { {1.0, 0.0, 0.0, 0.0}, {0.0, 1.0, 0.0, 0.0}, {0.0, 0.0, 1.0, 0.0}, {0.0, 0.0, 0.0, 1.0} };
+static const mat4_t MAT4_ZEROS = { {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0} };
+static const mat4_t MAT4_ONES  = { {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0} };
+static const mat4_t MAT4_EYE   = { {1.0, 0.0, 0.0, 0.0}, {0.0, 1.0, 0.0, 0.0}, {0.0, 0.0, 1.0, 0.0}, {0.0, 0.0, 0.0, 1.0} };
 
 static inline void mat4(vec4_t *m
     , m_float m11, m_float m12, m_float m13, m_float m14
@@ -943,9 +954,21 @@ static inline void mat4_mul_mat4(vec4_t *m, const vec4_t *a, const vec4_t *b)
     m[2][3] = a[0][3]*b[2][0] + a[1][3]*b[2][1] + a[2][3]*b[2][2] + a[3][3]*b[2][3];
     m[3][3] = a[0][3]*b[3][0] + a[1][3]*b[3][1] + a[2][3]*b[3][2] + a[3][3]*b[3][3];
 }
-static inline void mat4_orthographic(vec4_t *m, m_float xmin, m_float xmax, m_float ymin, m_float ymax, m_float znear, m_float zfar)
+static inline void mat4_orthographic(vec4_t *m, m_float xmin, m_float xmax, m_float ymin, m_float ymax, m_float zmin, m_float zmax)
 {
+    mat4_clear(m);
 
+    m_float dx = xmax - xmin;
+    m_float dy = ymax - ymin;
+    m_float dz = zmax - zmin;
+
+    m[0][0] =  2/dx;
+    m[1][1] =  2/dy;
+    m[2][2] = -2/dz;
+    m[3][0] = -(xmax + xmin)/dx;
+    m[3][1] = -(ymax + ymin)/dy;
+    m[3][2] = -(zmax + zmin)/dz;
+    m[3][3] = 1.0;
 }
 static inline void mat4_perspective(vec4_t *m, m_float aspect, m_float yfov, m_float n, m_float f)
 {
@@ -960,9 +983,107 @@ static inline void mat4_perspective(vec4_t *m, m_float aspect, m_float yfov, m_f
     m[3][2] = -2*f*n/(f-n);
     m[2][3] = -1;
 }
-static inline void mat4_frustum(vec4_t *m, ...)
+static inline void mat4_lookat(vec4_t *m, const m_float *eye, const m_float *point, const m_float *up)
 {
+    vec3_t f, r, u;
 
+    vec3_sub(f, eye, point);
+    vec3_normalize(f, f);
+
+    vec3_cross(r, up, f);
+    vec3_normalize(r, r);
+
+    vec3_cross(u, r, f);
+    vec3_normalize(u, u);
+
+    mat4_identity(m);
+
+    m[0][0] = r[0];
+    m[1][0] = r[1];
+    m[2][0] = r[2];
+    
+    m[0][1] = u[0];
+    m[1][1] = u[1];
+    m[2][1] = u[2];
+    
+    m[0][2] = f[0];
+    m[1][2] = f[1];
+    m[2][2] = f[2];
+
+    m[3][0] = -vec3_dot(eye, r);
+    m[3][1] = -vec3_dot(eye, u);
+    m[3][2] = -vec3_dot(eye, f);
+}
+static inline void mat4_lookat_dir(vec4_t *m, const m_float *eye, const m_float *dir, const m_float *up)
+{
+    mat4_identity(m);
+    
+    vec3_t f, r, u;
+
+    vec3_flip(f, dir);
+    vec3_normalize(f, f);
+
+    vec3_cross(r, up, f);
+    vec3_normalize(r, r);
+
+    vec3_cross(u, r, f);
+    vec3_normalize(u, u);
+
+    m[0][0] = r[0];
+    m[1][0] = r[1];
+    m[2][0] = r[2];
+    
+    m[0][1] = u[0];
+    m[1][1] = u[1];
+    m[2][1] = u[2];
+    
+    m[0][2] = f[0];
+    m[1][2] = f[1];
+    m[2][2] = f[2];
+
+    m[3][0] = -vec3_dot(eye, r);
+    m[3][1] = -vec3_dot(eye, u);
+    m[3][2] = -vec3_dot(eye, f);
+}
+static inline void mat4_transform_from_local(vec4_t *m, const m_float *origin, const m_float *x, const m_float *y, const m_float *z)
+{
+    mat4_identity(m);
+
+    m[0][0] = x[0];
+    m[1][0] = x[1];
+    m[2][0] = x[2];
+    
+    m[0][1] = y[0];
+    m[1][1] = y[1];
+    m[2][1] = y[2];
+    
+    m[0][2] = z[0];
+    m[1][2] = z[1];
+    m[2][2] = z[2];
+
+    m[3][0] = -vec3_dot(origin, x);
+    m[3][1] = -vec3_dot(origin, y);
+    m[3][2] = -vec3_dot(origin, z);
+}
+static inline void mat4_inv_transform_from_local(vec4_t *m, const m_float *origin, const m_float *x, const m_float *y, const m_float *z)
+{
+    mat4_identity(m);
+
+    m[0][0] = x[0];
+    m[0][1] = x[1];
+    m[0][2] = x[2];
+    
+    m[1][0] = y[0];
+    m[1][1] = y[1];
+    m[1][2] = y[2];
+    
+    m[2][0] = z[0];
+    m[2][1] = z[1];
+    m[2][2] = z[2];
+
+    m[0][3] = vec3_dot(origin, x);
+    m[1][3] = vec3_dot(origin, y);
+    m[2][3] = vec3_dot(origin, z);
 }
 static inline void mat4_print(const vec4_t *m)
 {
@@ -1040,5 +1161,29 @@ static inline void tform_lookat(vec4_t *m, const m_float *eye, const m_float *up
     m[3][1] = vec3_dot(u, eye);
     m[3][2] = vec3_dot(f, eye);
 }
+
+//-------------------------------------------------------------------------------------
+// Frustum math
+//-------------------------------------------------------------------------------------
+
+// THIS IS COLLISION MATH!
+
+typedef struct {
+    m_float near, far;
+    m_float left, right;
+    m_float top, bottom;
+    m_float angle;
+} frustum_t;
+
+// TODO: write some visibility checks with the frustum?
+
+//-------------------------------------------------------------------------------------
+// Color spaces
+//-------------------------------------------------------------------------------------
+
+typedef float color_t[4];
+
+
+
 
 #endif

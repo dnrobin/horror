@@ -1,6 +1,8 @@
 #include "shared.h"
 #include "r_mesh.h"
 
+#include "glad.h"
+
 int r_create_mesh(mesh_t *mesh)
 {
     glGenVertexArrays(1, &mesh->gl_handle);
@@ -9,13 +11,13 @@ int r_create_mesh(mesh_t *mesh)
     for (int b = 0; b < mesh->num_buffers; ++b) {
 
         glGenBuffers(1, &mesh->buffers[b].gl_handle);
-        glBindBuffer(GL_ARRAY_BUFFER, &mesh->buffers[b].gl_handle);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->buffers[b].gl_handle);
         glBufferData(GL_ARRAY_BUFFER
-            , &mesh->buffers[b].vertex_size
-            , &mesh->buffers[b].data
+            , mesh->buffers[b].vertex_size
+            , mesh->buffers[b].data
             , GL_STATIC_DRAW);
 
-        vertex_attrib_t *attribs = &mesh->buffers[b].attribs;
+        vertex_attrib_t *attribs = mesh->buffers[b].attribs;
 
         for (int i = 0; i < MAX_VERTEX_ATTRIBUTES; ++i) {
             
@@ -34,13 +36,13 @@ int r_create_mesh(mesh_t *mesh)
         }
     }
 
-    if (&mesh->size_indices > 0) {
+    if (mesh->size_indices > 0) {
         GLuint element_buffer;
         glGenBuffers(1, &element_buffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER
-            , &mesh->size_indices
-            , &mesh->indices
+            , mesh->size_indices
+            , mesh->indices
             , GL_STATIC_DRAW); 
     }
 

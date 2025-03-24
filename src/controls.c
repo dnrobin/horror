@@ -7,31 +7,42 @@
 #include "sound.h"
 #include "game.h"
 
-static vec2_t old_coords;
+// track mouse movement
+static float last_x;
+static float last_y;
+
+const vec2_t mouse_speed = { 0.002, 0.001 };
 
 void update_mouse()
 {
+	// TODO: track mouse with the callback function instead!!
 	int xpos, ypos;
-
 	i_get_mouse_coordinates(&xpos, &ypos);
 
-	// convert to normalized screen coordinates
-	// Note: since we warp mouse back to center every frame,
-	// these coordinates are actually deltas from one frame
-	// to the next.
-	float delta_x = (xpos - old_coords[0]) / (float)g_window_width;
-	float delta_y = (ypos - old_coords[1]) / (float)g_window_height;
+	static bool first_event = true;
 
-	old_coords[0] = xpos;
-	old_coords[1] = ypos;
+    if (first_event) {
+        last_x = xpos;
+        last_y = ypos;
+        first_event = false;
+    }
+
+    float dx = xpos - last_x;
+    float dy = ypos - last_y;
+
+	last_x = xpos;
+    last_y = ypos;
 
 	float mouse_y_dir = +1;
 	if (g_mouse_invert_y) {
 		mouse_y_dir = -1;
 	}
-	
-	cam_pan(g_camera, delta_x * g_mouse_sensitivity);
-	cam_pitch(g_camera, delta_y * g_mouse_sensitivity * mouse_y_dir);
+
+    float angle_y = -dx * mouse_speed[0];
+    float angle_x = dy * mouse_speed[1];
+
+	cam_pan(g_camera, 	angle_y * g_mouse_sensitivity);
+	cam_pitch(g_camera, angle_x * g_mouse_sensitivity * mouse_y_dir);
 }
 
 int G_DEBUG_CURRENT_SOUND_ID = 0;
@@ -121,8 +132,7 @@ void update_keys()
 
 void c_init_controls()
 {
-	old_coords[0] = g_window_width/2;
-	old_coords[1] = g_window_height/2;
+	
 }
 
 void c_update_controls()

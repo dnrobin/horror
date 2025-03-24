@@ -20,6 +20,12 @@ camera_t *g_camera = &game_camera;
 
 #include "map_definitions.inc"
 
+typedef enum {
+	PLAYER_JUST_SCARED,
+	PLAYER_REACTING_TO_SCARE,
+	PLAYER_
+} player_state_t;
+
 /* -------------------------------------------- INIT -------------------------------------------- */
 
 static void unload_map()
@@ -51,7 +57,7 @@ static void load_map()
 	}
 
 	// TEMP!!!!!!!!!!!!!!!!!!!!!!
-	g_main_shader_program = 3;
+	g_main_shader_program = ((shader_t*)get_asset(map_shaders[0].asset_id)->obj)->gl_handle;
 	// TEMP!!!!!!!!!!!!!!!!!!!!!!
 	
 	#ifdef __DEBUG
@@ -102,8 +108,9 @@ void game_code_init()
 	float start_z = 0;
 	
 	/* camera physics */
-	g_camera->zfar = 0.1;
-	g_camera->zfar = 10;
+	g_camera->yfov = 70;
+	g_camera->znear = 0.1;
+	g_camera->zfar = 100;
 	// g_camera->yfov	// set at update to match player model
 	cam_reset_orientation(g_camera);
 	g_camera_collision_model.radius = 0.39;
@@ -126,7 +133,7 @@ void game_code_init()
 	
 	/* controls init */
 	g_mouse_sensitivity = 1.5;
-	g_mouse_invert_y = false;
+	g_mouse_invert_y = true;
 	
 	/* stress level */
 	g_player_anxiety_level = 1.0;	// always start at 1
@@ -167,42 +174,56 @@ static void move_player()
 
 	if ( g_state[G_PLAYER_MOVING] && !g_state[G_PLAYER_PARALIZED] ) {
 
-		if ( g_state[G_MOVING_FORWARD] ) {
-			cam_move_forward(g_camera, distance);
-			// if ( !g_state[G_PHY_CLIPPING] ) {
-			// 	cam_move_forward(g_camera, distance);
-			// } else {
-			// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
-			// 	vec3_normalize(v, v);
-			// 	vec3_scale(v, v, distance);
-			// 	cam_move_by(g_camera, v);
-			// }
+		vec2_t d = {0, 0};
+
+		if (g_state[G_MOVING_FORWARD]) {
+			d[1] += +1;
 		}
-		if ( g_state[G_MOVING_BACKWARD] ) {
-			cam_move_backward(g_camera, distance);
-			// if ( !g_state[G_PHY_CLIPPING] ) {
-			// 	cam_move_backward(g_camera, distance);
-			// } else {
-			// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
-			// 	vec3_normalize(v, v);
-			// 	vec3_scale(v, v, -distance);
-			// 	cam_move_by(g_camera, v);
-			// }
+		if (g_state[G_MOVING_LEFT]) {
+			d[0] += -1;
 		}
-		if ( g_state[G_MOVING_LEFT] ) {
-			cam_move_left(g_camera, distance);
+		if (g_state[G_MOVING_BACKWARD]) {
+			d[1] += -1;
 		}
-		if ( g_state[G_MOVING_RIGHT] ) {
-			cam_move_right(g_camera, distance);
+		if (g_state[G_MOVING_RIGHT]) {
+			d[0] += +1;
 		}
+
+		vec2_trim(d, d, distance);
+
+		cam_move_right(g_camera,   d[0]);
+		cam_move_forward(g_camera, d[1]);
+
+		// if ( g_state[G_MOVING_FORWARD] ) {
+		// 	cam_move_forward(g_camera, distance);
+		// 	// if ( !g_state[G_PHY_CLIPPING] ) {
+		// 	// 	cam_move_forward(g_camera, distance);
+		// 	// } else {
+		// 	// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
+		// 	// 	vec3_normalize(v, v);
+		// 	// 	vec3_scale(v, v, distance);
+		// 	// 	cam_move_by(g_camera, v);
+		// 	// }
+		// }
+		// if ( g_state[G_MOVING_BACKWARD] ) {
+		// 	cam_move_backward(g_camera, distance);
+		// 	// if ( !g_state[G_PHY_CLIPPING] ) {
+		// 	// 	cam_move_backward(g_camera, distance);
+		// 	// } else {
+		// 	// 	vec3_t v = { g_camera->look[0], 0, g_camera->look[2] };
+		// 	// 	vec3_normalize(v, v);
+		// 	// 	vec3_scale(v, v, -distance);
+		// 	// 	cam_move_by(g_camera, v);
+		// 	// }
+		// }
+		// if ( g_state[G_MOVING_LEFT] ) {
+		// 	cam_move_left(g_camera, distance);
+		// }
+		// if ( g_state[G_MOVING_RIGHT] ) {
+		// 	cam_move_right(g_camera, distance);
+		// }
 	}
 }
-
-typedef enum {
-	PLAYER_JUST_SCARED,
-	PLAYER_REACTING_TO_SCARE,
-	PLAYER_
-} player_state_t;
 
 /**
  * Player animation state machine:

@@ -1,6 +1,8 @@
 #include "shared.h"
 #include "graphics.h"
 
+#include "glad.h"
+
 #include <string.h>
 
 void checkGLError()
