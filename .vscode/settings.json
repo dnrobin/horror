@@ -37,6 +37,23 @@
         "mem.h": "c",
         "glfw3.h": "c",
         "shader.h": "c",
-        "glad_210.h": "c"
+        "glad_210.h": "c",
+        "unistd.h": "c",
+        "utsname.h": "c",
+        "stdarg.h": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "bitset": "c",
+        "initializer_list": "c",
+        "string": "c",
+        "string_view": "c",
+        "unordered_map": "c",
+        "__tree": "c",
+        "map": "c",
+        "sstream": "c",
+        "env.h": "c",
+        "jas_private.h": "c",
+        "time.h": "c",
+        "jas.h": "c"
     }
 }
