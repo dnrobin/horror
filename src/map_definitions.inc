@@ -10,35 +10,26 @@
 
 #include "glad.h"
 
-#define MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO 		1
-#define MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL 		2
-#define MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS 	3
-#define MAP_ASSET_TEXTURE_BRICKWALL_1_METALLIC 		4
-#define MAP_ASSET_TEXTURE_BRICKWALL_1_DISPLACE 		5
-
-#define MAP_ASSET_TEXTURE_STONEWALL_1_ALBEDO 		6
-#define MAP_ASSET_TEXTURE_STONEWALL_1_NORMAL 		7
-#define MAP_ASSET_TEXTURE_STONEWALL_1_ROUGHNESS 	8
-#define MAP_ASSET_TEXTURE_STONEWALL_1_METALLIC 		9
-#define MAP_ASSET_TEXTURE_STONEWALL_1_DISPLACE 		10
-#define MAP_ASSET_TEXTURE_STONEWALL_1_AO 			11
-
 #define MAP_ASSET_DEFAULT_SHADER 100
 
 static map_asset_descriptor_t map_assets[] = {
 
-	{ MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_albedo.jpg" },
-	{ MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_normal.png" },
-	{ MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_roughness.jpg" },
-	{ MAP_ASSET_TEXTURE_BRICKWALL_1_METALLIC, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_metallic.jpg" },
-	{ MAP_ASSET_TEXTURE_BRICKWALL_1_DISPLACE, ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_displacement.tiff" },
+	// { 50, 	ASSET_IMAGE, "textures/dusty-cobble/dusty-cobble_albedo.png" },
+	// { 51, 	ASSET_IMAGE, "textures/dusty-cobble/dusty-cobble_ao.png" },
+	// { 52, 	ASSET_IMAGE, "textures/dusty-cobble/dusty-cobble_roughness.png" },
+	// { 53, 	ASSET_IMAGE, "textures/dusty-cobble/dusty-cobble_normal-ogl.png" },
 
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_ALBEDO, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_albedo.png" },
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_NORMAL, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_normal-ogl.png" },
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_ROUGHNESS, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_roughness.png" },
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_METALLIC, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_metallic.png" },
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_DISPLACE, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_height.png" },
-	// { MAP_ASSET_TEXTURE_STONEWALL_1_AO, ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_ao.png" },
+	// { 60, 	ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_albedo.jpg" },
+	// { 61, 	ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_normal.png" },
+	// { 62, 	ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_roughness.jpg" },
+	// { 63, 	ASSET_IMAGE, "textures/dutch_brickwall/dutch_brickwall_metallic.jpg" },
+
+	// { 70, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_albedo.png" },
+	// { 71, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_normal-ogl.png" },
+	// { 72, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_roughness.png" },
+	// { 73, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_metallic.png" },
+	// { 74, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_height.png" },
+	// { 75, 	ASSET_IMAGE, "textures/sloppy-mortar-stone-wall/sloppy-mortar-stone-wall_ao.png" },
 
 	{ 987, 	ASSET_IMAGE, "textures/walltex_06_diffuse.bmp" },
 	{ 989, 	ASSET_IMAGE, "textures/walltex_06_diffuse2.bmp" },

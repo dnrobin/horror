@@ -90,6 +90,7 @@ void init()
 	glUniform1i(glGetUniformLocation(prog, "tex_albedo"), 0);
 	glUniform1i(glGetUniformLocation(prog, "tex_normal"), 1);
 	glUniform1i(glGetUniformLocation(prog, "tex_roughness"), 2);
+	glUniform1i(glGetUniformLocation(prog, "tex_ao"), 3);
 	/*** MOVE THIS */
 	
 	#ifdef __DEBUG

@@ -212,7 +212,16 @@ int saveMap(const int mapc, const float* mapv, const char* filename ) {
 }
 
 int loadMap(const char* filename)
-{	
+{
+	GLuint white_texture;
+	glGenTextures(1, &white_texture);
+	glBindTexture(GL_TEXTURE_2D, white_texture);
+	unsigned char pix[] = {0xff,0xff,0xff,0xff};
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pix);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	FILE* fp;
 	char filepath[256];
 	t_map_descriptor map;
@@ -312,17 +321,38 @@ int loadMap(const char* filename)
 		g_collisions[i].v3 = (vec3_t){ face->verts[2].x, (face->normal.y==1.0?-0.35:face->verts[2].y), face->verts[2].z };
 		g_collisions[i].v4 = (vec3_t){ face->verts[3].x, (face->normal.y==1.0?-0.35:face->verts[3].y), face->verts[3].z };
 		g_collisions[i].normal = (vec3_t){ face->normal.x, face->normal.y, face->normal.z };
-		
 
-		glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(face->texid)->obj)->gl_handle);
-		glLineWidth(5);
-
-		// glActiveTexture(GL_TEXTURE0 + 0);
-		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_ALBEDO)->obj)->gl_handle);
-		// glActiveTexture(GL_TEXTURE0 + 1);
-		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_NORMAL)->obj)->gl_handle);
-		// glActiveTexture(GL_TEXTURE0 + 2);
-		// glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(MAP_ASSET_TEXTURE_BRICKWALL_1_ROUGHNESS)->obj)->gl_handle);
+		switch (face->texid) {
+			// case 988:
+			// 	glActiveTexture(GL_TEXTURE0 + 0);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(50)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 1);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(51)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 2);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(52)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 3);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(53)->obj)->gl_handle);
+			// 	break;
+			// case 987:
+			// 	glActiveTexture(GL_TEXTURE0 + 0);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(70)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 1);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(71)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 2);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(72)->obj)->gl_handle);
+			// 	glActiveTexture(GL_TEXTURE0 + 3);
+			// 	glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(75)->obj)->gl_handle);
+			// 	break;
+			default:
+				glActiveTexture(GL_TEXTURE0 + 0);
+				glBindTexture(GL_TEXTURE_2D, ((texture_t*)get_asset(face->texid)->obj)->gl_handle);
+				glActiveTexture(GL_TEXTURE0 + 1);
+				glBindTexture(GL_TEXTURE_2D, white_texture);
+				glActiveTexture(GL_TEXTURE0 + 2);
+				glBindTexture(GL_TEXTURE_2D, white_texture);
+				glActiveTexture(GL_TEXTURE0 + 3);
+				glBindTexture(GL_TEXTURE_2D, white_texture);
+		}
 
 		if (0) {
 		
@@ -345,6 +375,7 @@ int loadMap(const char* filename)
 				glMultiTexCoord2f(GL_TEXTURE0 + 0, face->tcoords[j].x, face->tcoords[j].y);
 				glMultiTexCoord2f(GL_TEXTURE0 + 1, face->tcoords[j].x, face->tcoords[j].y);
 				glMultiTexCoord2f(GL_TEXTURE0 + 2, face->tcoords[j].x, face->tcoords[j].y);
+				glMultiTexCoord2f(GL_TEXTURE0 + 3, face->tcoords[j].x, face->tcoords[j].y);
 				glColor4f(face->colors[j].r,face->colors[j].r,face->colors[j].r, 1.0);
 				glVertex3f(face->verts[j].x, face->verts[j].y, face->verts[j].z);
 			}

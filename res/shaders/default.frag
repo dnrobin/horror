@@ -9,7 +9,10 @@
  * gl_LightSource[7] - party light settings
  **/
 
-uniform sampler2D tex0;
+uniform sampler2D tex_albedo;
+// uniform sampler2D tex_normal;
+// uniform sampler2D tex_roughness;
+// uniform sampler2D tex_ao;
 
 varying vec2 texCoord;
 varying vec3 fragPosition;
@@ -21,7 +24,7 @@ void main()
 	vec3 l = gl_LightSource[0].position.xyz - fragPosition;
 	float d = length(l);
 
-	vec4 color = texture2D(tex0, texCoord);
+	vec4 color = texture2D(tex_albedo, texCoord);
 
 	float lightAtten = 1.0 / (gl_LightSource[3].constantAttenuation +
 		gl_LightSource[3].linearAttenuation * d +
