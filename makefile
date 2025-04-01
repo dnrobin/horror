@@ -6,7 +6,7 @@ CFLAGS+=-MMD
 CFLAGS+=-O0 -g
 
 LDFLAGS=-framework OpenGL -framework OpenAL -framework IOKit -framework CoreAudio -framework Cocoa
-LDLIBS =-Lext/glfw/src -lglfw3 -Lext/libdae/lib -ldae
+LDLIBS =-Lext/glfw/lib -lglfw3 -Lext/libdae/lib -ldae
 
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:src/%.c=build/%.o)
