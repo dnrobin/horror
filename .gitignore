@@ -56,3 +56,6 @@ dkms.conf
 
 # VScode
 .vscode
+
+# other
+build
