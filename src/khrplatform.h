@@ -8,12 +8,12 @@
 ** copy of this software and/or associated documentation files (the
 ** "Materials"), to deal in the Materials without restriction, including
 ** without limitation the rights to use, copy, modify, merge, publish,
-** distribute, sublicense, and/or sell copies of the Materials, and to
-** permit persons to whom the Materials are furnished to do so, subject to
+** distribute, vec3_sub(license, and/or sell copies of the Materials, and to
+** permit persons to whom the Materials are furnished to do so, vec3_sub(ject to
 ** the following conditions:
 **
 ** The above copyright notice and this permission notice shall be included
-** in all copies or substantial portions of the Materials.
+** in all copies or vec3_sub(stantial portions of the Materials.
 **
 ** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -32,9 +32,9 @@
  *      67a3e0864c2d75ea5287b9f3d2eb74a745936692
  *
  * Adopters may modify this file to suit their platform. Adopters are
- * encouraged to submit platform specific modifications to the Khronos
+ * encouraged to vec3_sub(mit platform specific modifications to the Khronos
  * group so that they can be included in future versions of this file.
- * Please submit changes by filing pull requests or issues on
+ * Please vec3_sub(mit changes by filing pull requests or issues on
  * the EGL Registry repository linked above.
  *
  *

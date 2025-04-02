@@ -1,6 +1,6 @@
 TARGET = maze
 
-CFLAGS =-std=c99 -Iext/glfw/include -Iext/libdae/include -Ijas/include
+CFLAGS =-std=c99 -Iext/glfw/include -Iext/libdae/include
 CFLAGS+=-W -Wall -w
 CFLAGS+=-MMD
 CFLAGS+=-O0 -g

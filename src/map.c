@@ -9,7 +9,7 @@
 #include "collision.h"
 #include "texture.h"
 
-#include "r_mesh.h"
+#include "new_renderer/r_mesh.h"
 
 #include "parson.h"
 
