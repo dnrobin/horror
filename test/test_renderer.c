@@ -1,60 +1,112 @@
 #include "shared.h"
-#include "r_mesh.h"
-#include "r_shader.h"
-#include "r_render.h"
+// #include "r_mesh.h"
+// #include "r_shader.h"
+// #include "r_render.h"
 
 #include "glad.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// DEFINITIONS
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+enum {
+    VERTEX_ATTRIB_POSITION = 0,
+    VERTEX_ATTRIB_TANGENT,
+    VERTEX_ATTRIB_NORMAL,
+    VERTEX_ATTRIB_COLOR,
+    VERTEX_ATTRIB_TEXCOORD0,
+    VERTEX_ATTRIB_TEXCOORD1,
+    VERTEX_ATTRIB_TEXCOORD2,
+    VERTEX_ATTRIB_TEXCOORD3,
+
+    MAX_VERTEX_ATTRIBUTE
+} vertex_attrib_t;
+
+enum {
+    SHADER_UNIFORM_LOC_MODELMATRIX,
+    SHADER_UNIFORM_LOC_VIEWMATRIX,
+    SHADER_UNIFORM_LOC_PROJMATRIX,
+    SHADER_UNIFORM_LOC_NORMALMATRIX,
+    SHADER_UNIFORM_LOC_TIME,
+
+    MAX_SHADER_UNIFORM_LOCATION
+} vertex_attrib_t;
+
+
+
+typedef struct {
+    unsigned int id;        // open gl resource id (vao)
+    
+} mesh_t;
+
+typedef struct {
+    unsigned int id;        // open gl resource id
+    unsigned int locs[MAX_SHADER_UNIFORM_LOCATION];
+} shader_t;
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// RENDERING FUNCTIONS
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAIN PROGRAM
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// App
 static GLFWwindow *win;
 static int win_width = 800;
 static int win_height = 600;
 
+// Input
 static bool keys[GLFW_KEY_LAST] = {0};
 
+// Camera
 static float look_pitch = 0;
 static float look_yaw = M_PI;
 static vec3_t eye = { 0, 0, -5 };
 
-static GLuint prog;
+// World
 
-static mesh_t cube_mesh;
 
-static GLuint vao;
+// Render
+static GLuint shader_id;
+static GLuint vbo, ibo, vao;
+static int num_vertices;
 static int num_indices;
 
-static const char *vertex_source = 
-"#version 330\n"
-"layout(location = 0) in vec3 pos;\n"
-"layout(location = 1) in vec3 col;\n"
-"uniform mat4 m_Model;\n"
-"uniform mat4 m_View;\n"
-"uniform mat4 m_Proj;\n"
-"out vec3 v_color;\n"
-"void main() {\n"
-"   gl_Position = m_Proj * m_View * m_Model * vec4(pos, 1);\n"
-"   v_color = col;"
-"}\n";
-
-static const char *fragment_source = 
-"#version 330\n"
-"in vec3 v_color;\n"
-"out vec4 color;\n"
-"void main() {\n"
-"   color = vec4(v_color, 1);\n"
-"}\n";
-
-//==========================================================================================
-
-// create a simple test mesh and render it.
-
-void r_mesh_debug_cube(mesh_t *mesh)
+void make_cube_mesh()
 {
-    #if 1
+#if 1
+    static float cube_vertices[] = {
+        -1, -1, -1, 1, 0, 0, -1, -1, 1,
+         1, -1, -1, 1, 0, 0,  1, -1, 2,
+         1,  1, -1, 1, 0, 0,  1,  1, 3,
+    
+        -1, -1, -1, 1, 0, 0, -1, -1, 4,
+         1,  1, -1, 1, 0, 0,  1,  1, 5,
+        -1,  1, -1, 1, 0, 0, -1,  1, 6,
+    };
 
-    ///////////////////////////////////////////////////////
-    // cube mesh
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    float vertices[] = {
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 3*sizeof(float), (void*)(0));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, 0, 3*sizeof(float), (void*)(3*sizeof(float)));
+
+    glBindVertexArray(0);
+
+#else
+    static float cube_vertices[] = {
         -1, -1, -1,  // 0
         -1, -1, +1,  // 1
         -1, +1, -1,  // 2
@@ -65,7 +117,7 @@ void r_mesh_debug_cube(mesh_t *mesh)
         +1, +1, +1,  // 7
     };
 
-    float colors[] = {
+    static float cube_colors[] = {
         0, 0, 1,
         1, 0, 1,
         1, 0, 0,
@@ -76,7 +128,7 @@ void r_mesh_debug_cube(mesh_t *mesh)
         0, 0, 0,
     };
 
-    unsigned int indices[] = {
+    static unsigned int cube_indices[] = {
         0, 4, 6,
         0, 6, 2,
 
@@ -90,42 +142,17 @@ void r_mesh_debug_cube(mesh_t *mesh)
         1, 2, 3,
     };
 
-    num_indices = sizeof(indices) / sizeof(unsigned int);
-
-    #else
-
-    ///////////////////////////////////////////////////////
-    // triangle mesh
-    
-    float vertices[] = {
-        -1, -1, 0,
-         1, -1, 0,
-         0,  1, 0,
-    };
-
-    float colors[] = {
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1,
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2
-    };
-
-    #endif
-
     GLuint vbo1, vbo2, ibo;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     glGenBuffers(1, &vbo1);
     glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 
     glGenBuffers(1, &vbo2);
     glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_colors), cube_colors, GL_STATIC_DRAW);
 
     // position
     glBindBuffer(GL_ARRAY_BUFFER, vbo1);
@@ -140,9 +167,10 @@ void r_mesh_debug_cube(mesh_t *mesh)
     // indices
     glGenBuffers(1, &ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
+#endif
 }
 
 //==========================================================================================
@@ -228,19 +256,19 @@ static void update_and_render(double dt)
 
     int loc;
 
-    glUseProgram(prog);
+    glUseProgram(shader_id);
 
     // set view transform
-    loc = glGetUniformLocation(prog, "m_View");
+    loc = glGetUniformLocation(shader_id, "m_View");
     glUniformMatrix4fv(loc, 1, GL_FALSE, v[0]);
-    loc = glGetUniformLocation(prog, "m_Proj");
+    loc = glGetUniformLocation(shader_id, "m_Proj");
     glUniformMatrix4fv(loc, 1, GL_FALSE, p[0]);
 
         glBindVertexArray(vao);
 
         mat4_t m;
         mat4_identity(m);
-        loc = glGetUniformLocation(prog, "m_Model");
+        loc = glGetUniformLocation(shader_id, "m_Model");
         glUniformMatrix4fv(loc, 1, GL_FALSE, m[0]);
 
         // glDrawArrays(GL_TRIANGLES, 0, 3);

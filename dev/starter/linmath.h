@@ -1155,23 +1155,23 @@ typedef struct {
     vec3            translation;
     quat            rotation;
     vec3            scaling;
-} tform;
+} transform;
 
 // lookat() performs a change of basis from canonical [x,y,z]
 // coordinates to a rotated frame in view space. The matrix 
 // must represent going from canonical coordinates to local 
 // view coordinates. Thus, it is the >inverted< basis matrix.
 
-static inline void tform_identity(tform *out)
+static inline void transform_identity(transform *out)
 {
     quat_identity(out->rotation);
     vec3_zero(out->translation);
     vec3_ones(out->scaling);
 }
-static inline void tform_transform_vec4(float *out, const tform *t, const float *v);
-static inline void tform_transform_coord(float *out, const tform *t, const float *xyz);
-static inline void tform_apply_transform(tform *out, const tform *in, const tform *other);
-static inline void tform_from_mat4(tform *out, const vec4 *m)
+static inline void transform_transform_vec4(float *out, const transform *t, const float *v);
+static inline void transform_transform_coord(float *out, const transform *t, const float *xyz);
+static inline void transform_apply_transform(transform *out, const transform *in, const transform *other);
+static inline void transform_from_mat4(transform *out, const vec4 *m)
 {
     vec3 u, v, w;
 
@@ -1187,7 +1187,7 @@ static inline void tform_from_mat4(tform *out, const vec4 *m)
     vec3_normalize(v);
     vec3_normalize(w);
 }
-static inline void tform_to_mat4(vec4 *out, const tform *t)
+static inline void transform_to_mat4(vec4 *out, const transform *t)
 {
     // ~~ transform matrix
     // | rx  ry  rz  tx  |
@@ -1207,7 +1207,7 @@ static inline void tform_to_mat4(vec4 *out, const tform *t)
     out[1][1] *= t->scaling[1];
     out[2][2] *= t->scaling[2];         // what about w coordinate trick??
 }
-static inline void tform_inverse_to_mat4(vec4 *out, const tform *t)
+static inline void transform_inverse_to_mat4(vec4 *out, const transform *t)
 {
     // ~~ inv transform matrix
     // |  rx  ux  fx  0   |
@@ -1224,7 +1224,7 @@ static inline void tform_inverse_to_mat4(vec4 *out, const tform *t)
     out[1][1] *= t->scaling[1];
     out[2][2] *= t->scaling[2];
 }
-static inline void tform_rotate_quat(vec4 *out, const vec4 *m, const float *q)
+static inline void transform_rotate_quat(vec4 *out, const vec4 *m, const float *q)
 {
     float
         q0q0 = q[0]*q[0], q0q1 = q[0]*q[1], q0q2 = q[0]*q[2], q0q3 = q[0]*q[3],
@@ -1250,29 +1250,10 @@ static inline void tform_rotate_quat(vec4 *out, const vec4 *m, const float *q)
     mat4_mul_mat4(out, r, m);
 }
 
-
-//-------------------------------------------------------------------------------------
-// Frustum math
-//-------------------------------------------------------------------------------------
-
-// THIS IS COLLISION MATH!
-
-typedef struct {
-    float near, far;
-    float left, right;
-    float top, bottom;
-    float angle;
-} frustum_t;
-
-// TODO: write some visibility checks with the frustum?
-
 //-------------------------------------------------------------------------------------
 // Color spaces
 //-------------------------------------------------------------------------------------
 
-typedef float color_t[4];
-
-
-
+typedef float color[4];
 
 #endif

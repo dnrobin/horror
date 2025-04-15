@@ -1,7 +1,8 @@
-#ifndef __MAZE_GAME_TYPES_H__
-#define __MAZE_GAME_TYPES_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef unsigned int    uint;
 typedef unsigned char   byte;

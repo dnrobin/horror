@@ -54,6 +54,24 @@
         "env.h": "c",
         "jas_private.h": "c",
         "time.h": "c",
-        "jas.h": "c"
+        "jas.h": "c",
+        "atomic": "c",
+        "bit": "c",
+        "cstddef": "c",
+        "locale": "c",
+        "new": "c",
+        "variant": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "__tuple": "c",
+        "tuple": "c",
+        "cgltf.h": "c",
+        "stdint.h": "c",
+        "typeinfo": "c",
+        "system_error": "c",
+        "log.h": "c",
+        "__bit_reference": "c",
+        "__memory": "c",
+        "render.h": "c"
     }
 }
