@@ -72,6 +72,12 @@
         "log.h": "c",
         "__bit_reference": "c",
         "__memory": "c",
-        "render.h": "c"
+        "render.h": "c",
+        "squid.h": "c",
+        "istream": "c",
+        "memory": "c",
+        "__string": "c",
+        "stddef.h": "c",
+        "float.h": "c"
     }
 }
