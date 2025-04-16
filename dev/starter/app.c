@@ -13,14 +13,14 @@ GLuint u_xy_loc;
 float x = 0;
 float y = 0;
 
-const char *vs_str =
+const char *vs_str = "#version 410\n"
 "in vec2 v_Position;\n"
 "uniform vec2 u_xy;\n"
 "void main() {\n"
 "    gl_Position = vec4(u_xy + v_Position, 0, 1);\n"
 "}";
 
-const char *fs_str =
+const char *fs_str = "#version 410\n"
 "out vec4 finalColor;"
 "void main() {\n"
 "   finalColor = vec4(1, 0, 0, 1);\n"
