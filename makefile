@@ -1,12 +1,12 @@
 TARGET = maze
 
-CFLAGS =-std=c99 -Iext/glfw/include -Iext/libdae/include
+CFLAGS =-std=c99 -Iext/glfw/include -Iext/assimp/include
 CFLAGS+=-W -Wall -w
 CFLAGS+=-MMD
 CFLAGS+=-O0 -g
 
 LDFLAGS=-framework OpenGL -framework OpenAL -framework IOKit -framework CoreAudio -framework Cocoa
-LDLIBS =-Lext/glfw/src -lglfw3 -Lext/libdae/lib -ldae
+LDLIBS =-Lext/glfw/src -lglfw3 -Lext/assimp/lib -lassimp
 
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:src/%.c=build/%.o)

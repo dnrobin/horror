@@ -78,6 +78,21 @@
         "memory": "c",
         "__string": "c",
         "stddef.h": "c",
-        "float.h": "c"
+        "float.h": "c",
+        "fileio.h": "c",
+        "stat.h": "c",
+        "scene.h": "c",
+        "postprocess.h": "c",
+        "debug.h": "c",
+        "cimport.h": "c",
+        "image.h": "c",
+        "set": "c",
+        "deque": "c",
+        "list": "c",
+        "queue": "c",
+        "regex": "c",
+        "stack": "c",
+        "unordered_set": "c",
+        "random": "c"
     }
 }
